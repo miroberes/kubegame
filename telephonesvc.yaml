@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: telephone
+  namespace: village
+spec:
+  clusterIP: None
+  ports:
+  - name: wizardsphone
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  - name: toothfairysphone
+    port: 8082
+    protocol: TCP
+    targetPort: 8082
+  selector:
+    app: telephone-operator
+  type: ClusterIP

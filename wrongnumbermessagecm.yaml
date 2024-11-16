@@ -1,0 +1,15 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+data:
+  index.html: |
+    Wrong number! Tut, tut, tut ....
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2024-11-16T12:02:43Z"
+  name: gate-message-closed
+  namespace: village
+  resourceVersion: "375712"
+  uid: 72b4f6b7-fa9c-4432-8fa6-13774ccc497e

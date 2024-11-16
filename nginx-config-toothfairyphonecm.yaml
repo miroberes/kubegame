@@ -1,0 +1,16 @@
+apiVersion: v1
+data:
+  default.conf: |
+    server {
+      listen 8082;
+      server_name localhost;
+
+      location / {
+        root /usr/share/nginx/html;
+        index index.html;
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: nginx-config-toothfairyphone
+  namespace: village
