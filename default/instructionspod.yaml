@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: instructionspod
+  name: instructionspod
+spec:
+  containers:
+  - name: instructionspod
+    image: nginx:alpine
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 80
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo '' >> /usr/share/nginx/html/index.html;
+        echo 'Welcome to the Kubernetes Kingdom Adventure!' > /usr/share/nginx/html/index.html;
+        echo '' >> /usr/share/nginx/html/index.html;
+        echo 'Plot: A mysterious curse has befallen the kingdom. Only the brave who master Kubernetes commands can unlock its secrets and lift the curse.' >> /usr/share/nginx/html/index.html;
+        echo '' >> /usr/share/nginx/html/index.html;
+        echo 'First Quest: Inspect the "gate" pod to discover how to open the gate and begin your journey.' >> /usr/share/nginx/html/index.html;
+        echo '' >> /usr/share/nginx/html/index.html;
+        echo 'Good luck!' >> /usr/share/nginx/html/index.html;
+        echo '' >> /usr/share/nginx/html/index.html;
+        nginx -g 'daemon off;'
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

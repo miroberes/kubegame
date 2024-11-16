@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  index.html: |
+    Hello, you've reached the Tooth Fairy's voicemail! I’m probably busy fluttering around, collecting teeth and leaving little surprises under pillows. If you've just lost a tooth, congratulations! Please leave your name, age, and the tooth's special story after the beep, and I'll be sure to leave something special for you tonight. Remember, the more sparkly your tooth, the more magic it holds! Beep!
+kind: ConfigMap
+metadata:
+  name: toothfairymessage
+  namespace: village

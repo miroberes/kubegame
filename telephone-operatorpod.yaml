@@ -1,0 +1,49 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: telephone-operator
+  name: telephone-operator
+  namespace: village
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: Always
+    name: wizardsphone
+    ports:
+    - containerPort: 8081
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: wizardsmessage
+    - mountPath: /etc/nginx/conf.d
+      name: nginx-config-wizardsphone
+  - image: nginx
+    imagePullPolicy: Always
+    name: toothfairyphone
+    ports:
+    - containerPort: 8082
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: toothfairymessage
+    - mountPath: /etc/nginx/conf.d
+      name: nginx-config-toothfairyphone
+  restartPolicy: Always
+  volumes:
+  - configMap:
+      name: wizardsmessage
+    name: wizardsmessage
+  - configMap:
+      name: toothfairymessage
+    name: toothfairymessage
+  - configMap:
+      name: nginx-config-wizardsphone
+    name: nginx-config-wizardsphone
+  - configMap:
+      name: nginx-config-toothfairyphone
+    name: nginx-config-toothfairyphone
