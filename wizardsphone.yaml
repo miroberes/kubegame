@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wizardsphone
+  namespace: village
+  labels:
+    app: wizardsphone
+spec:
+  containers:
+  - name: open-gate
+    image: nginx
+    ports:
+    - containerPort: 8081
+    volumeMounts:
+    - name: gate-message-open
+      mountPath: /usr/share/nginx/html
+    - name: nginx-config-open
+      mountPath: /etc/nginx/conf.d
+  - name: closed-gate
+    image: nginx
+    ports:
+    - containerPort: 8082
+    volumeMounts:
+    - name: gate-message-closed
+      mountPath: /usr/share/nginx/html
+    - name: nginx-config-closed
+      mountPath: /etc/nginx/conf.d
+  volumes:
+  - name: gate-message-open
+    configMap:
+      name: gate-message-open
+  - name: gate-message-closed
+    configMap:
+      name: gate-message-closed
+  - name: nginx-config-open
+    configMap:
+      name: nginx-config-open
+  - name: nginx-config-closed
+    configMap:
+      name: nginx-config-closed
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gate-message-open
+  namespace: village
+data:
+  index.html: |
+    Hello, this is Wizard. You may come to my house, to open the door use the spell: sns wizardshouse
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gate-message-closed
+  namespace: village
+data:
+  index.html: |
+    Wrong number! Tut, tut, tut ....
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-open
+  namespace: village
+data:
+  default.conf: |
+    server {
+      listen 8081;
+      server_name localhost;
+
+      location / {
+        root /usr/share/nginx/html;
+        index index.html;
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-closed
+  namespace: village
+data:
+  default.conf: |
+    server {
+      listen 8082;
+      server_name localhost;
+
+      location / {
+        root /usr/share/nginx/html;
+        index index.html;
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telephone
+  namespace: village
+spec:
+  selector:
+    app: wizardsphone
+  ports:
+    - name: open-gate
+      port: 8081
+      targetPort: 8081
+    - name: closed-gate
+      port: 8082
+      targetPort: 8082
+  clusterIP: None  # Optional: This creates a headless service; remove if you want load balancing.
+
