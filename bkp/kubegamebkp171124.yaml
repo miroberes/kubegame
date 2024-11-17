@@ -1,0 +1,675 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2024-11-16T17:33:22Z"
+    labels:
+      run: playerpod
+    name: playerpod
+    namespace: village
+    resourceVersion: "396399"
+    uid: 9afe8e39-c182-43d4-984a-bd7f5fa5d2e7
+  spec:
+    containers:
+    - command:
+      - /bin/sh
+      - -c
+      - sleep infinity
+      image: curlimages/curl
+      imagePullPolicy: Always
+      name: player-container
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-vdvph
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: k3d-k3dcluster-server-0
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-vdvph
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-16T17:33:22Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T14:59:28Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T14:59:28Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-16T17:33:22Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://4d13b06293f1f276ec87b55a7deb7d213df53ecc90f33355943d0175c3009663
+      image: docker.io/curlimages/curl:latest
+      imageID: docker.io/curlimages/curl@sha256:83a505ba2ba62f208ed6e410c268b7b9aa48f0f7b403c8108b9773b44199dbba
+      lastState:
+        terminated:
+          containerID: containerd://12ed44c8d172d75809ccef491f10242fc53a4f1f1760a49a0beb45797dbe4cd3
+          exitCode: 255
+          finishedAt: "2024-11-17T14:59:21Z"
+          reason: Unknown
+          startedAt: "2024-11-17T07:27:10Z"
+      name: player-container
+      ready: true
+      restartCount: 2
+      started: true
+      state:
+        running:
+          startedAt: "2024-11-17T14:59:27Z"
+    hostIP: 172.19.0.2
+    phase: Running
+    podIP: 10.42.0.225
+    podIPs:
+    - ip: 10.42.0.225
+    qosClass: BestEffort
+    startTime: "2024-11-16T17:33:22Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2024-11-16T21:49:37Z"
+    labels:
+      run: poster-on-the-chimney
+    name: poster-on-the-chimney
+    namespace: village
+    resourceVersion: "396448"
+    uid: 6f163795-19dc-43ae-8e88-b61b246be24c
+  spec:
+    containers:
+    - command:
+      - /bin/sh
+      - -c
+      - "echo 'Chimneysweep shouting from the roof: The message reads: Welcome to
+        the village. Enjoy your stay. Call wizard on his phone if you want to visit
+        him.' > /usr/share/nginx/html/index.html;\nnginx -g 'daemon off;' \n"
+      image: nginx
+      imagePullPolicy: Always
+      name: poster
+      ports:
+      - containerPort: 80
+        protocol: TCP
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-5vvj5
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    initContainers:
+    - command:
+      - /bin/sh
+      - -c
+      - |
+        echo "The poster is too high up on the chimney, wouldn't it be cool if somebody could get there and read it?" >> /dev/stderr;
+        # Sleep for a short time to ensure the logs are written
+        sleep 5
+      image: busybox
+      imagePullPolicy: Always
+      name: cluelogger
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-5vvj5
+        readOnly: true
+    nodeName: k3d-k3dcluster-server-0
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-5vvj5
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T14:59:33Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T14:59:35Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T14:59:35Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-16T21:49:37Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://e9527162915af7d51e544b4bdab2a988bc7ebc9578381c4c09becf3e6e66ec02
+      image: docker.io/library/nginx:latest
+      imageID: docker.io/library/nginx@sha256:bc5eac5eafc581aeda3008b4b1f07ebba230de2f27d47767129a6a905c84f470
+      lastState:
+        terminated:
+          containerID: containerd://4aef74da0edfc3fed04eba49861d820e75296396f9aa2067626a8238744c0ebd
+          exitCode: 255
+          finishedAt: "2024-11-17T14:59:21Z"
+          reason: Unknown
+          startedAt: "2024-11-17T07:27:17Z"
+      name: poster
+      ready: true
+      restartCount: 2
+      started: true
+      state:
+        running:
+          startedAt: "2024-11-17T14:59:35Z"
+    hostIP: 172.19.0.2
+    initContainerStatuses:
+    - containerID: containerd://ca82f87cdf85cbe23a9fa08c3437ea66c02935431bc5c918d14ea127cc8e77db
+      image: docker.io/library/busybox:latest
+      imageID: docker.io/library/busybox@sha256:768e5c6f5cb6db0794eec98dc7a967f40631746c32232b78a3105fb946f3ab83
+      lastState: {}
+      name: cluelogger
+      ready: true
+      restartCount: 2
+      state:
+        terminated:
+          containerID: containerd://ca82f87cdf85cbe23a9fa08c3437ea66c02935431bc5c918d14ea127cc8e77db
+          exitCode: 0
+          finishedAt: "2024-11-17T14:59:33Z"
+          reason: Completed
+          startedAt: "2024-11-17T14:59:27Z"
+    phase: Running
+    podIP: 10.42.0.229
+    podIPs:
+    - ip: 10.42.0.229
+    qosClass: BestEffort
+    startTime: "2024-11-16T21:49:37Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"creationTimestamp":"2024-11-17T21:13:22Z","labels":{"run":"telephone-booth"},"name":"telephone-booth","namespace":"village","resourceVersion":"403571","uid":"3a1e5556-df49-40e0-b9d8-f3ba58b990ac"},"spec":{"containers":[{"command":["/bin/sh","-c","echo \"A classic telephone booth, sturdy but worn. The receiver hums softly. The display flickers, showing recent calls: 8082, 8081, 7777...\" \u003e\u003e /dev/stderr;\nsleep infinity \n"],"image":"busybox","imagePullPolicy":"Always","name":"cluelogger","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","volumeMounts":[{"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount","name":"kube-api-access-xhg62","readOnly":true}]}],"dnsPolicy":"ClusterFirst","enableServiceLinks":true,"nodeName":"k3d-k3dcluster-server-0","preemptionPolicy":"PreemptLowerPriority","priority":0,"restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"serviceAccount":"default","serviceAccountName":"default","terminationGracePeriodSeconds":30,"tolerations":[{"effect":"NoExecute","key":"node.kubernetes.io/not-ready","operator":"Exists","tolerationSeconds":300},{"effect":"NoExecute","key":"node.kubernetes.io/unreachable","operator":"Exists","tolerationSeconds":300}],"volumes":[{"name":"kube-api-access-xhg62","projected":{"defaultMode":420,"sources":[{"serviceAccountToken":{"expirationSeconds":3607,"path":"token"}},{"configMap":{"items":[{"key":"ca.crt","path":"ca.crt"}],"name":"kube-root-ca.crt"}},{"downwardAPI":{"items":[{"fieldRef":{"apiVersion":"v1","fieldPath":"metadata.namespace"},"path":"namespace"}]}}]}}]},"status":{"conditions":[{"lastProbeTime":null,"lastTransitionTime":"2024-11-17T21:13:22Z","status":"True","type":"Initialized"},{"lastProbeTime":null,"lastTransitionTime":"2024-11-17T21:13:56Z","message":"containers with unready status: [cluelogger]","reason":"ContainersNotReady","status":"False","type":"Ready"},{"lastProbeTime":null,"lastTransitionTime":"2024-11-17T21:13:56Z","message":"containers with unready status: [cluelogger]","reason":"ContainersNotReady","status":"False","type":"ContainersReady"},{"lastProbeTime":null,"lastTransitionTime":"2024-11-17T21:13:22Z","status":"True","type":"PodScheduled"}],"containerStatuses":[{"containerID":"containerd://418bc58a01400f38119a0f65a4e39a91ba7346272e3658dc12f39c8a55c3771d","image":"docker.io/library/busybox:latest","imageID":"docker.io/library/busybox@sha256:768e5c6f5cb6db0794eec98dc7a967f40631746c32232b78a3105fb946f3ab83","lastState":{"terminated":{"containerID":"containerd://418bc58a01400f38119a0f65a4e39a91ba7346272e3658dc12f39c8a55c3771d","exitCode":0,"finishedAt":"2024-11-17T21:13:56Z","reason":"Completed","startedAt":"2024-11-17T21:13:51Z"}},"name":"cluelogger","ready":false,"restartCount":2,"started":false,"state":{"waiting":{"message":"back-off 20s restarting failed container=cluelogger pod=telephone-booth_village(3a1e5556-df49-40e0-b9d8-f3ba58b990ac)","reason":"CrashLoopBackOff"}}}],"hostIP":"172.19.0.2","phase":"Running","podIP":"10.42.0.236","podIPs":[{"ip":"10.42.0.236"}],"qosClass":"BestEffort","startTime":"2024-11-17T21:13:22Z"}}
+    creationTimestamp: "2024-11-17T21:15:21Z"
+    labels:
+      run: telephone-booth
+    name: telephone-booth
+    namespace: village
+    resourceVersion: "403621"
+    uid: 5a36b1f2-e2a9-49ee-9bef-e416ce3ebf67
+  spec:
+    containers:
+    - command:
+      - /bin/sh
+      - -c
+      - "echo \"A classic telephone booth, sturdy but worn. The receiver hums softly.
+        The display flickers, showing recent calls: 8082, 8081, 7777...\" >> /dev/stderr;\nsleep
+        infinity \n"
+      image: busybox
+      imagePullPolicy: Always
+      name: cluelogger
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-xhg62
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: k3d-k3dcluster-server-0
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-xhg62
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:15:21Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:15:23Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:15:23Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:15:21Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://2215391285befca9792352dd5d239292526d08c611f127a1dee462967547ece4
+      image: docker.io/library/busybox:latest
+      imageID: docker.io/library/busybox@sha256:768e5c6f5cb6db0794eec98dc7a967f40631746c32232b78a3105fb946f3ab83
+      lastState: {}
+      name: cluelogger
+      ready: true
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2024-11-17T21:15:22Z"
+    hostIP: 172.19.0.2
+    phase: Running
+    podIP: 10.42.0.237
+    podIPs:
+    - ip: 10.42.0.237
+    qosClass: BestEffort
+    startTime: "2024-11-17T21:15:21Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"app":"telephone-operator"},"name":"telephone-operator","namespace":"village"},"spec":{"containers":[{"image":"nginx","imagePullPolicy":"IfNotPresent","name":"wizardsphone","ports":[{"containerPort":8081,"protocol":"TCP"}],"volumeMounts":[{"mountPath":"/usr/share/nginx/html","name":"wizardsmessage"},{"mountPath":"/etc/nginx/conf.d","name":"nginx-config-wizardsphone"}]},{"image":"nginx","imagePullPolicy":"IfNotPresent","name":"toothfairyphone","ports":[{"containerPort":8082,"protocol":"TCP"}],"volumeMounts":[{"mountPath":"/usr/share/nginx/html","name":"toothfairymessage"},{"mountPath":"/etc/nginx/conf.d","name":"nginx-config-toothfairyphone"}]}],"restartPolicy":"Always","volumes":[{"configMap":{"defaultMode":420,"name":"wizardsmessage"},"name":"wizardsmessage"},{"configMap":{"defaultMode":420,"name":"toothfairymessage"},"name":"toothfairymessage"},{"configMap":{"defaultMode":420,"name":"nginx-config-wizardsphone"},"name":"nginx-config-wizardsphone"},{"configMap":{"defaultMode":420,"name":"nginx-config-toothfairyphone"},"name":"nginx-config-toothfairyphone"}]}}
+    creationTimestamp: "2024-11-17T21:36:05Z"
+    labels:
+      app: telephone-operator
+    name: telephone-operator
+    namespace: village
+    resourceVersion: "404069"
+    uid: 34f1c750-87d2-4c82-aef5-8e4c65ce1c77
+  spec:
+    containers:
+    - image: nginx
+      imagePullPolicy: IfNotPresent
+      name: wizardsphone
+      ports:
+      - containerPort: 8081
+        protocol: TCP
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /usr/share/nginx/html
+        name: wizardsmessage
+      - mountPath: /etc/nginx/conf.d
+        name: nginx-config-wizardsphone
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-8djcr
+        readOnly: true
+    - image: nginx
+      imagePullPolicy: IfNotPresent
+      name: toothfairyphone
+      ports:
+      - containerPort: 8082
+        protocol: TCP
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /usr/share/nginx/html
+        name: toothfairymessage
+      - mountPath: /etc/nginx/conf.d
+        name: nginx-config-toothfairyphone
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-8djcr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: k3d-k3dcluster-server-0
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - configMap:
+        defaultMode: 420
+        name: wizardsmessage
+      name: wizardsmessage
+    - configMap:
+        defaultMode: 420
+        name: toothfairymessage
+      name: toothfairymessage
+    - configMap:
+        defaultMode: 420
+        name: nginx-config-wizardsphone
+      name: nginx-config-wizardsphone
+    - configMap:
+        defaultMode: 420
+        name: nginx-config-toothfairyphone
+      name: nginx-config-toothfairyphone
+    - name: kube-api-access-8djcr
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:36:05Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:36:06Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:36:06Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2024-11-17T21:36:05Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://69ab8d50d8260b27d1ff68d67f9edaac944848196f2b6a9042c435f101c5f738
+      image: docker.io/library/nginx:latest
+      imageID: docker.io/library/nginx@sha256:bc5eac5eafc581aeda3008b4b1f07ebba230de2f27d47767129a6a905c84f470
+      lastState: {}
+      name: toothfairyphone
+      ready: true
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2024-11-17T21:36:05Z"
+    - containerID: containerd://1dbc2b14622bc7c4296a365ab1edc46606f3971a3077824c6b87b213eae2b2d6
+      image: docker.io/library/nginx:latest
+      imageID: docker.io/library/nginx@sha256:bc5eac5eafc581aeda3008b4b1f07ebba230de2f27d47767129a6a905c84f470
+      lastState: {}
+      name: wizardsphone
+      ready: true
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2024-11-17T21:36:05Z"
+    hostIP: 172.19.0.2
+    phase: Running
+    podIP: 10.42.0.240
+    podIPs:
+    - ip: 10.42.0.240
+    qosClass: BestEffort
+    startTime: "2024-11-17T21:36:05Z"
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: "2024-11-16T19:52:05Z"
+    name: chimneysweep
+    namespace: village
+    resourceVersion: "384958"
+    uid: 7b23ace1-8b67-463a-ade4-d9d6d182fdd3
+  spec:
+    clusterIP: 10.43.172.127
+    clusterIPs:
+    - 10.43.172.127
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      run: poster-on-the-chimney
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"telephone","namespace":"village"},"spec":{"clusterIP":"None","ports":[{"name":"wizardsphone","port":8081,"protocol":"TCP","targetPort":8081},{"name":"toothfairysphone","port":8082,"protocol":"TCP","targetPort":8082}],"selector":{"app":"telephone-operator"},"type":"ClusterIP"}}
+    creationTimestamp: "2024-11-17T21:23:08Z"
+    name: telephone
+    namespace: village
+    resourceVersion: "403762"
+    uid: 3c4f40c3-814d-410c-9daf-071e9a60205b
+  spec:
+    clusterIP: None
+    clusterIPs:
+    - None
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: wizardsphone
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+    - name: toothfairysphone
+      port: 8082
+      protocol: TCP
+      targetPort: 8082
+    selector:
+      app: telephone-operator
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIBeDCCAR2gAwIBAgIBADAKBggqhkjOPQQDAjAjMSEwHwYDVQQDDBhrM3Mtc2Vy
+      dmVyLWNhQDE2OTYwODI4NDIwHhcNMjMwOTMwMTQwNzIyWhcNMzMwOTI3MTQwNzIy
+      WjAjMSEwHwYDVQQDDBhrM3Mtc2VydmVyLWNhQDE2OTYwODI4NDIwWTATBgcqhkjO
+      PQIBBggqhkjOPQMBBwNCAATJ8xTtGxJoPmkLGeWq7/9fh/bthm5c+h2JQ1ITryb6
+      dekRteMpKucUrX3JwEGqEIbsRFyuUGyHa16D3V3EsJJgo0IwQDAOBgNVHQ8BAf8E
+      BAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUclPircPAQgFrqDKpn+UK
+      ZMLpgVEwCgYIKoZIzj0EAwIDSQAwRgIhAJWKCj3pVIXcOb0WzU8DeNEcu1Yz76tY
+      jpjDDMGKvOaSAiEA3/DhgInSCoM0L+eA+O5XWjJVAQ0yVo62t01XwTlj4Sc=
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2024-11-15T19:06:38Z"
+    name: kube-root-ca.crt
+    namespace: village
+    resourceVersion: "365870"
+    uid: 23ccbb3c-5e1a-439d-9dbe-0b621feec5b2
+- apiVersion: v1
+  data:
+    index.html: |
+      Hello, you've reached the Tooth Fairy's voicemail! I’m probably busy fluttering around, collecting teeth and leaving little surprises under pillows. If you've just lost a tooth, congratulations! Please leave your name, age, and the tooth's special story after the beep, and I'll be sure to leave something special for you tonight. Remember, the more sparkly your tooth, the more magic it holds! Beep!
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","data":{"index.html":"Hello, you've reached the Tooth Fairy's voicemail! I’m probably busy fluttering around, collecting teeth and leaving little surprises under pillows. If you've just lost a tooth, congratulations! Please leave your name, age, and the tooth's special story after the beep, and I'll be sure to leave something special for you tonight. Remember, the more sparkly your tooth, the more magic it holds! Beep!\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"toothfairymessage","namespace":"village"}}
+    creationTimestamp: "2024-11-16T21:17:39Z"
+    name: toothfairymessage
+    namespace: village
+    resourceVersion: "386714"
+    uid: fa4d34e6-8730-46bb-ae38-0db4ab0cb618
+- apiVersion: v1
+  data:
+    index.html: |
+      Hello, this is Wizard. You may come to my house, to open the door use the spell: sns wizardshouse
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","data":{"index.html":"Hello, this is Wizard. You may come to my house, to open the door use the spell: sns wizardshouse\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"wizardsmessage","namespace":"village"}}
+    creationTimestamp: "2024-11-16T21:18:27Z"
+    name: wizardsmessage
+    namespace: village
+    resourceVersion: "386729"
+    uid: a24332f3-9930-4d2d-a168-33e155a33efa
+- apiVersion: v1
+  data:
+    default.conf: |
+      server {
+        listen 8081;
+        server_name localhost;
+
+        location / {
+          root /usr/share/nginx/html;
+          index index.html;
+        }
+      }
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","data":{"default.conf":"server {\n  listen 8081;\n  server_name localhost;\n\n  location / {\n    root /usr/share/nginx/html;\n    index index.html;\n  }\n}\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"nginx-config-wizardsphone","namespace":"village"}}
+    creationTimestamp: "2024-11-16T21:20:40Z"
+    name: nginx-config-wizardsphone
+    namespace: village
+    resourceVersion: "386769"
+    uid: d53039e6-de68-4de6-aca8-c4e3abb22794
+- apiVersion: v1
+  data:
+    default.conf: |
+      server {
+        listen 8082;
+        server_name localhost;
+
+        location / {
+          root /usr/share/nginx/html;
+          index index.html;
+        }
+      }
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","data":{"default.conf":"server {\n  listen 8082;\n  server_name localhost;\n\n  location / {\n    root /usr/share/nginx/html;\n    index index.html;\n  }\n}\n"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"nginx-config-toothfairyphone","namespace":"village"}}
+    creationTimestamp: "2024-11-16T21:20:50Z"
+    name: nginx-config-toothfairyphone
+    namespace: village
+    resourceVersion: "386773"
+    uid: 0923e977-2b02-41cf-9e53-501a75782bd2
+kind: List
+metadata:
+  resourceVersion: ""

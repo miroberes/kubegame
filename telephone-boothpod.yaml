@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: telephone-booth
+  name: telephone-booth
+spec:
+  containers:
+  - image: busybox
+    name: cluelogger
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "A classic telephone booth, sturdy but worn. The receiver hums softly. The display flickers, showing recent calls: 8082, 8081, 7777..." >> /dev/stderr;
+        sleep infinity

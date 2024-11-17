@@ -1,7 +1,3 @@
-# Please edit the object below. Lines beginning with a '#' will be ignored,
-# and an empty file will abort the edit. If an error occurs while saving this file will be
-# reopened with the relevant failures.
-#
 apiVersion: v1
 kind: Pod
 metadata:
@@ -12,7 +8,7 @@ metadata:
 spec:
   containers:
   - image: nginx
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     name: wizardsphone
     ports:
     - containerPort: 8081
@@ -23,7 +19,7 @@ spec:
     - mountPath: /etc/nginx/conf.d
       name: nginx-config-wizardsphone
   - image: nginx
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     name: toothfairyphone
     ports:
     - containerPort: 8082
@@ -36,14 +32,18 @@ spec:
   restartPolicy: Always
   volumes:
   - configMap:
+      defaultMode: 420
       name: wizardsmessage
     name: wizardsmessage
   - configMap:
+      defaultMode: 420
       name: toothfairymessage
     name: toothfairymessage
   - configMap:
+      defaultMode: 420
       name: nginx-config-wizardsphone
     name: nginx-config-wizardsphone
   - configMap:
+      defaultMode: 420
       name: nginx-config-toothfairyphone
     name: nginx-config-toothfairyphone
