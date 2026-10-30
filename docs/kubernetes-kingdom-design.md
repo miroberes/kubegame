@@ -90,7 +90,7 @@ Places to update:
 
 ### Known limits of plain aliases
 
-- No story lines under errors (aliases cannot see output).
+- No story lines under errors (aliases cannot see output). The wrapper above fixes this.
 - No "what you actually did" line. The `alias` listing replaces it.
 - `enter nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).
 - `call` needs the full target (`telephone:8081`), with no port shortcut.
@@ -138,6 +138,61 @@ Notes:
 - Raw commands (`kubectl exec`, `wget`) bypass this layer, so players will see story lines only when they use spells.
 - A fuller function-based prototype (with an `enter` existence check, a `call <port>` shortcut, and a "spell behind the spell" line) was drafted in `spells.sh`. It was judged more than needed for a first version.
 
+### Story layer via a kubectl wrapper (preferred)
+
+Because the player's shell lives in the game's own container (section 6), the story layer can sit in front of `kubectl` itself instead of in a helper behind each alias. A wrapper script is placed ahead of the real binary on `PATH`. It runs the real kubectl, passes everything through, and adds a story line after known failures.
+
+Benefits over the `story` helper:
+
+- Story lines appear whether the player used a spell **or** the raw `kubectl` command, so behavior is consistent.
+- The spells go back to being plain aliases of `kubectl ...`, so `alias` shows the real command with no `story` prefix.
+- The fade-out is one switch: in Act III the wrapper stops adding lines.
+
+Sketch (must be tested, see cautions below):
+
+```bash
+#!/usr/bin/env bash
+# /usr/local/bin/kubectl  (ahead of the real binary on PATH)
+REAL=/usr/local/libexec/kubectl.real
+ACT=$("$REAL" get configmap kingdom-state -n default \
+        -o jsonpath='{.data.act}' 2>/dev/null)          # progress lives in the cluster
+ACT=${ACT:-2}
+[ "$ACT" = "3" ] && exec "$REAL" "$@"                   # Act III: native only
+
+errfile=$(mktemp); trap 'rm -f "$errfile"' EXIT
+"$REAL" "$@" 2> >(tee "$errfile" >&2)                   # stderr streams live and is copied
+rc=$?
+wait $! 2>/dev/null                                     # let the copy finish (bash 4.4+)
+
+if [ $rc -ne 0 ]; then
+  ns=$(sed -n 's/.*in the namespace "\([^"]*\)".*/\1/p' "$errfile" | head -n1)
+  if grep -qi forbidden "$errfile"; then
+    case "$ns" in
+      village)      echo "The villagers turn their backs on you. You have no standing here yet." ;;
+      wizardshouse) echo "The door stays shut. The wizard does not know you." ;;
+      *)            echo "The way is barred. You have no standing here yet." ;;
+    esac
+  elif grep -qi 'notfound\|not found' "$errfile"; then
+    echo "Nothing here answers to that name."
+  fi
+fi
+exit $rc
+```
+
+Spells then become plain aliases again (as in the definitions above).
+
+The current act is read from a ConfigMap in the cluster (the player's role needs `get` on that one object), so progress is state in Kubernetes and not a side file. The cost is one extra API call per command. A plain file inside the container would also work, since nothing leaves the container, but the cluster-state version matches the state-based principle.
+
+Cautions:
+
+- **Keep stdout, stderr, and the exit status intact.** Scripts and any validator that calls kubectl depend on them.
+- **Test interactive modes** (`exec -it`, `logs -f`, `edit`, `port-forward`). Copying stderr as it streams avoids buffering, but the ordering of the story line after the native error needs checking.
+- **Keep matches narrow** (Forbidden, NotFound). An unrecognized error gets no story line.
+- **Be honest about it.** Players on a real cluster will not have the wrapper. The fade-out handles this, and a short intro note or a spellbook quest can reveal it.
+- **Limits:** it only sees output in the player's shell. Errors inside pods (application logs) are game content you control anyway.
+
+The `story` helper above remains the fallback if the player's shell is ever not in the game container.
+
 ### `use`
 
 The brief names `use` but never defines it. Its role is undecided.
@@ -151,6 +206,7 @@ The village exists from the start. Access is controlled by RBAC.
 - **Restricted player identity.** The player must not hold cluster-admin credentials. The environment hands them a ServiceAccount or user with only Act I rights (for example `logs` and `exec` on the gate pod). Without this, no `Forbidden` error ever fires.
 - **Unlocking = a RoleBinding.** Solving the gate puzzle makes `check_phrase.sh` (or the gate pod) create a RoleBinding granting the player rights in `village`. The unlock is a real object, discoverable with `kubectl get rolebindings -n village`.
 - **Privilege escalation rules.** The gate pod's ServiceAccount needs permission to create RoleBindings in `village`. Kubernetes blocks escalation, so it also needs the `bind` verb on the specific Role it hands out.
+- **Who creates the RoleBinding.** Two options. In-cluster: `check_phrase.sh` creates it, which keeps all puzzle logic inside Kubernetes (more native) but requires the gate's ServiceAccount to have `create` on rolebindings and `bind` on the Role. Engine-side: the container's startup/engine script, holding the admin credentials, creates it after observing the solved state (no `bind` setup needed, but puzzle logic lives outside the world).
 - **Minimum first grant.** Step 6 needs `pods/exec` in `village` (the player pod lives there). The wizard's house gets its own binding when the telephone puzzle is solved.
 - **Namespace lookups.** If a spell checks that a namespace exists, the player's role needs `get` on namespaces.
 - **What RBAC does not control.** In-cluster traffic such as the `wget` calls between pods is unaffected. Act II's "locks" are RBAC (kubectl access), while its "puzzles" are networking. Keep these separate when designing content.
@@ -169,39 +225,139 @@ The native line names the user, verb, resource, and namespace, which feeds `kube
 
 ## 6. Delivery: how players run the game
 
-### Decision: a Docker image
+### Constraint (decided)
 
-Players run the game locally via Docker. The only prerequisite is Docker.
+**The game must not touch anything on the host.** No bind mounts, no Docker socket, no host-installed tools beyond Docker itself, and no leftover volumes unless the player opts in.
+
+This rules out the Compose + kind architecture borrowed from the exam-practice specification (section 11): an engine container creating a kind cluster needs the Docker socket (control of the player's whole Docker daemon), and the specification's kubeconfig and workspace are host bind mounts.
+
+### Decision: one self-contained container
 
 ```bash
-docker run -it --rm --privileged -v kingdom-save:/var/lib/rancher kingdom/game
+docker run -it --rm --privileged ghcr.io/<owner>/kingdom
 ```
 
-Image contents:
+Everything runs inside that one container. Exiting the shell removes the container and everything in it.
 
-- A small cluster (k3s is the usual choice).
-- The game manifests, applied at startup.
-- The restricted kubeconfig for the player identity (admin credentials never in the player's shell).
-- The aliases in the player's bashrc.
-- A save volume (progress persists between runs; deleting the volume resets the game).
+```text
+Container
+├── k3s (single-node cluster, started at launch)
+├── game manifests (baked into the image, applied at startup)
+├── startup/engine script (admin credentials, RBAC setup, progress state)
+└── player shell (non-root user)
+    ├── spells (aliases)
+    ├── kubectl story wrapper
+    ├── Bash, Vim, basic utilities
+    └── restricted kubeconfig only
+```
 
-### Caveats to resolve
+Startup sequence (entrypoint script):
 
-- **`curl startgame` does not work automatically.** `startgame` is an in-cluster Service name. A shell inside the k3s container is not a pod and will not resolve cluster DNS names. Options: a game-shell alias that curls the service's ClusterIP or a NodePort, printing the welcome page at startup, or starting the player's shell in a pod (which would change the later `kubectl exec player` steps).
-- **`--privileged` looks alarming.** k3s needs it or a long list of capabilities. Explain it on the download page and test whether a narrower flag set works.
-- **Docker Desktop licensing.** Larger companies may need a paid license. Check current terms. Podman or Colima may work, but k3s support there must be tested.
-- **Resources.** A cluster in a container needs a few GB of RAM, which older laptops may struggle with.
-- **Everything is local,** so players can read manifests and solutions.
-- **Unverified.** Exact registry limits, k3s capability requirements, and platform terms were not checked and need verification.
+1. Start k3s and wait until it is ready.
+2. Create the restricted player identity (ServiceAccount) and write its kubeconfig inside the container.
+3. Apply the manifests (namespaces including `village`, pods, services, Act I RBAC, the `kingdom-state` ConfigMap).
+4. Print the welcome text and open the player's shell as the non-root player user.
 
-### Options considered and rejected
+### Credentials: the player must not be root
 
-| Option | Why rejected |
+k3s writes an admin kubeconfig inside the container. If the player's shell ran as root, the player could read it and bypass RBAC, and every `Forbidden` error would be fake. So:
+
+- The player shell runs as an unprivileged user.
+- The admin kubeconfig and k3s data directory stay root-only.
+- There is no `sudo` in the image.
+
+This is flavor-level protection, not a hard boundary. A determined player who controls Docker can always `docker exec` as root, which is acceptable for a learning game.
+
+### Installing the spells and the story layer
+
+Everything is baked into the image at build time. The player installs nothing.
+
+| Path | Contents |
 |---|---|
-| Install kind/minikube/kubectl on the player's laptop | Setup wall for beginners; touches the player's own shell config and machine |
-| Browser playground on a third-party platform | Dependency on third-party terms, limits, and commercial-use rules |
-| Own hosted sandbox | Ongoing cost and maintenance, abuse risk (free compute) |
-| Subscription or pay-per-use | Not needed for a free portfolio project; adds payments, licensing, and piracy concerns |
+| `/usr/local/libexec/kubectl.real` | The real kubectl, pinned and checksum-verified at build time, not on `PATH` |
+| `/usr/local/bin/kubectl` | The wrapper script (section 4), which calls the real binary by absolute path |
+| `/etc/kingdom/spells.rc` | The aliases, sourced from `/etc/bash.bashrc` |
+| `/game/manifests/` | The game manifests applied at startup |
+
+The wrapper intercepts a plain `kubectl` because `/usr/local/bin` precedes `/usr/bin` on `PATH`. Build-time test: `command -v kubectl` must return `/usr/local/bin/kubectl`.
+
+Dockerfile outline (untested, base image and k3s packaging unverified):
+
+```dockerfile
+FROM debian:12-slim
+ARG TARGETARCH
+ARG KUBECTL_VERSION          # keep within one minor version of the bundled k3s
+ARG K3S_VERSION
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends bash vim curl ca-certificates iptables \
+ && rm -rf /var/lib/apt/lists/*
+
+# Real kubectl (pinned, checksum-verified at build time, not on PATH)
+RUN mkdir -p /usr/local/libexec \
+ && curl -fsSLo /usr/local/libexec/kubectl.real \
+      "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl" \
+ && curl -fsSL "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl.sha256" \
+      | awk '{print $1"  /usr/local/libexec/kubectl.real"}' | sha256sum -c - \
+ && chmod 0755 /usr/local/libexec/kubectl.real
+
+# k3s (download, pin, and verify per the k3s release process)
+# ...
+
+# Player user, wrapper, spells, manifests, entrypoint
+RUN useradd -m player
+COPY workstation/kubectl-wrapper /usr/local/bin/kubectl
+COPY workstation/spells.rc       /etc/kingdom/spells.rc
+COPY manifests/                  /game/manifests/
+COPY entrypoint.sh               /entrypoint.sh
+RUN chmod 0755 /usr/local/bin/kubectl /entrypoint.sh \
+ && echo 'source /etc/kingdom/spells.rc' >> /etc/bash.bashrc
+ENTRYPOINT ["/entrypoint.sh"]
+```
+
+Checks: confirm that the player's interactive bash reads `/etc/bash.bashrc` (distro-dependent), that shell completion works through the wrapper, and that the engine/startup script calls the real binary so story lines never appear in its output.
+
+### Why `--privileged`
+
+A node must run containers itself (namespaces, overlay mounts, cgroups), set up pod networking (bridges, iptables), and reach kernel interfaces that a default container hides or makes read-only. `--privileged` lifts all those restrictions at once. It writes no host files, but it grants broad rights, so "touches nothing" is true for files and not for privileges. State this plainly on the download page.
+
+On Docker Desktop (Mac, Windows), containers run inside a Linux VM, so the exposure is that VM. On native Linux it is the real host.
+
+Test plan to narrow it (unverified): start from the smallest plausible set (specific `--cap-add` values, `--security-opt` overrides for seccomp/AppArmor, tmpfs mounts, cgroup settings) and add until k3s boots, on native Linux, Docker Desktop, and Podman. Alternatives were considered and rejected: rootless modes (fragile), Sysbox (requires a host install), VM-based setups (bigger prerequisite), API-server-only (no pods, so `logs`/`exec`/`wget` stop working).
+
+### Progress and persistence
+
+- **Default:** ephemeral. With `--rm`, every run starts at the gate.
+- **Without `--rm`:** progress survives `docker stop` and `docker start` inside the container's own filesystem, and disappears when the container is deleted.
+- **Opt-in volume:** an explicit "save my progress" option for players who want it (for example mounting a named volume for k3s state). Off by default so the default run leaves nothing behind.
+- Progress state itself (the current act) lives in the cluster (`kingdom-state` ConfigMap), not in a file.
+
+### Offline operation
+
+The image contains everything: k3s, kubectl, manifests, scenario images. Pin and test versions together. For offline distribution, provide the image as a file that can be loaded with `docker load`. Avoid runtime downloads from public registries.
+
+### `curl startgame`
+
+A shell in the same container as the node can likely reach the Service's cluster IP, but the name will not resolve through cluster DNS. A hosts entry or an alias, or printing the welcome page at startup, is probably enough. Needs testing.
+
+### Caveats
+
+- `--privileged` (above).
+- Docker Desktop has commercial licensing terms for larger companies; check current rules. Podman or Colima may work but k3s support there must be tested.
+- A cluster needs a few GB of RAM and the image is large.
+- Everything is local, so players can read manifests and solutions.
+- ARM and x86 players both need to be served (multi-architecture image).
+- Unverified: k3s-in-container behavior, exact flag sets, platform terms.
+
+### Options considered
+
+| Option | Outcome |
+|---|---|
+| Install kind/minikube/kubectl on the player's laptop | Rejected: setup wall for beginners; touches the player's machine |
+| Docker Compose + kind + workstation container (exam-practice spec) | Rejected for this game: needs the Docker socket and host bind mounts, which violates "touches nothing on the host" |
+| Browser terminal backed by a container running in the cloud | Possible later add-on using the same image; costs money per active player, needs strong isolation (privileged containers for strangers are risky), abuse controls, idle shutdown, and session orchestration; no offline play |
+| Third-party browser playground | Rejected as the main path: dependency on third-party terms, limits, and commercial-use rules |
+| Subscription or pay-per-use | Rejected: not needed for a free portfolio project |
 
 ---
 
@@ -209,8 +365,20 @@ Image contents:
 
 - **Free and open source**, public repo, public image. Costs reduce to the maintainer's time, registry limits, and a small site.
 - **License:** pick one (MIT or Apache 2.0 are typical).
-- **Registry:** GitHub Container Registry is the natural fit. Check current limits and terms.
-- **Remaining costs:** image bandwidth, rebuilds when Kubernetes/k3s/Docker change, user support ("it doesn't start on my machine").
+- **Registry:** see the Registry subsection below.
+- **Remaining costs:** image bandwidth (the offline bundle with kind node images is large), rebuilds when Kubernetes/k3s/Docker change, user support ("it doesn't start on my machine").
+
+### Registry
+
+Publish the image to **GitHub Container Registry (GHCR)** as the primary registry, since the repo and CI are on GitHub and Actions can push with the built-in token.
+
+- GitHub documents container image storage and bandwidth as currently free, with advance notice promised before that changes. "Currently" is not "permanently."
+- Anonymous pulls of public images are supported, so players need no account.
+- Third-party summaries report no rate limit on public pulls and free public storage and bandwidth. These come from secondary sources, so confirm on GitHub's own documentation.
+- Optional mirror on Docker Hub for discoverability. Its free tier rate-limits pulls (sources disagree on the exact figures: 100 or 200 per 6 hours for anonymous users), which could hurt a launch or a classroom. A Sponsored Open Source program exists that removes limits for qualifying projects.
+- Check per-layer and per-image size limits and test a push of the real image early, since the bundle will be large.
+- Build a multi-architecture image (x86 and ARM) in CI.
+- Keep a build-from-source path as an escape hatch in case registry terms change.
 
 ### What makes it work as a portfolio piece
 
@@ -242,9 +410,13 @@ Image contents:
 
 7. **Restricted player identity** and the RBAC manifests do not exist yet.
 8. **`check_phrase.sh` must create the RoleBinding** for the village (and the gate's ServiceAccount needs the `bind` permission).
-9. **`curl startgame` resolution** inside the Docker environment (section 6).
+9. **`curl startgame` resolution** inside the container (section 6).
 10. **`use` has no defined role.**
 11. **Manifest strings still say `sns`.**
+12. **Player must not be root** in the container, or the admin kubeconfig is readable and RBAC is bypassed (section 6).
+13. **Narrowing `--privileged`** is untested (section 6 test plan).
+14. **kubectl wrapper** needs testing for interactive modes, stream separation, and exit codes.
+15. **Base image and k3s packaging** for the single container are not decided or verified.
 
 ---
 
@@ -256,6 +428,11 @@ Image contents:
 - Should story lines be scenario-specific, error-type-based, or a mix (error-type default with scenario overrides)?
 - What does `use` do?
 - Which container runtimes are supported (Docker only, or also Podman/Colima)?
+- Who creates the village RoleBinding: `check_phrase.sh` in the cluster, or the startup/engine script (section 5)?
+- Should the engine also validate puzzle state (as in the exam-practice spec), or does the in-cluster logic suffice?
+- Is a fresh start on every run acceptable, or should progress persist by default?
+- Is a hosted browser version worth adding later, using the same image?
+- Which cluster inside the container: k3s (assumed) or something else?
 - What are the payoffs for the wizard's house, the Tooth Fairy, and the 7777 line? (7777 could be a deliberate red herring.)
 
 ---
@@ -264,7 +441,17 @@ Image contents:
 
 1. Settle the open issues: 8082 conflict, duplicate `telephone` Service, `player` vs `playerpod`, and rename `sns` to `enter` in the manifests.
 2. Create the restricted player identity and the Act I RBAC, with the RoleBinding created on solving the gate.
-3. Build the Docker image: k3s, manifests, restricted kubeconfig, aliases, save volume, and a working `startgame`.
+3. Run the `--privileged` narrowing experiment, then build the single container: k3s, manifests, non-root player user, restricted kubeconfig, aliases, kubectl wrapper, startup script, and a working `startgame`.
 4. Give the wizard's house and the Tooth Fairy real payoffs.
-5. Add CI with an automated Act I smoke test, plus the README, GIF, license, and `DESIGN.md`.
+5. Add CI (multi-architecture build, push to GHCR, automated Act I smoke test), plus the README, GIF, license, and `DESIGN.md`.
 6. Release Acts I and II. Build Act III (roles, contexts, CSRs) as a second milestone.
+
+---
+
+## 11. Relation to the exam-practice specification
+
+The local-kubernetes-game specification targets CKAD/CKA/CKS drills with real tools and no story. This game borrows several ideas from it: a separate player shell with real tools, offline-first with pinned and tested versions, state-based validation, and mission-level reset.
+
+It does not adopt its Compose + kind architecture, because that needs the Docker socket and host bind mounts, which violates this game's rule of touching nothing on the host (section 6). The single self-contained container delivers the same player experience inside one container.
+
+The two can be seen as a progression. The story game's spells fade out until Act III is plain kubectl, and that end state is where exam-style practice begins. The specification's own caveat applies to its scope, not ours: node-level CKA/CKS tasks (etcd, kubelet, control-plane services) cannot be reproduced on kind or k3s in a container, but this game's content is API-level. Keep the cluster backend replaceable anyway.
