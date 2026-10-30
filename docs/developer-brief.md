@@ -1,0 +1,40 @@
+# Kubernetes Kingdom: Developer Brief
+
+**Spoiler warning:** Everything below reveals solutions.
+
+## Act I: The Gate (`default` namespace)
+
+| Step | Player action | Solution | Result | Source | Status |
+|---|---|---|---|---|---|
+| 1. Start | Reads the welcome page | `curl startgame` | Shows plot and first quest | `default/instructionspod.yaml`, `startgamesvc.yaml` | Done |
+| 2. Inspect gate | Reads gate logs | `kubectl logs gate -c cluelogger` | "Whisper the magic key phrase... under the doormat" | `default/gatepod.yaml` | Done. README's `inspect` alias uses `-c main-container`, which doesn't exist here |
+| 3. Find phrase | Searches under the doormat | Phrase is `openplease` | Hint is in the logs only | `gatepod.yaml` (init script) | Phrase is readable in plain text in the manifest |
+| 4. Whisper | Speaks the phrase | `kubectl exec -it gate -- sh /scripts/check_phrase.sh openplease` | "Correct... Use the spell: sns village" | `gatepod.yaml` | Done |
+
+## Act II: The Village (`village` namespace)
+
+| Step | Player action | Solution | Result | Source | Status |
+|---|---|---|---|---|---|
+| 5. Enter village | Casts the spell | `sns village` | Unlocks village | None | Undefined. No `village` namespace manifest exists, and `sns` isn't defined |
+| 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` | Done. Poster logs hint at the chimney |
+| 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the spell: sns wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` | Partial. See conflicts below |
+| 8. Enter wizard's house | Casts the spell | `sns wizardshouse` | Door opens | None | Undefined. Nothing follows this step |
+| 9. Call Tooth Fairy | Dials port 8082 | `wget -O - telephone:8082` | Voicemail: teeth, gifts, "tooth's special story" | `toothfairymessagecm.yaml` | Partial. No reward mechanic |
+| 10. Booth clue | Reads booth logs | `kubectl logs telephone-booth` | Recent calls: 8082, 8081, 7777 | `telephone-boothpod.yaml` | 7777 leads nowhere |
+
+## Act III: Roles (not started)
+
+- After unlocking a namespace, a spell updates the player's role.
+- Players switch context to another user to gain access.
+- Players learn to create CSRs for users.
+
+No manifests exist for this act.
+
+## Open issues
+
+1. **Port 8082 conflict:** `wizardsphone.yaml` says "Wrong number," while the operator pod serves the Tooth Fairy.
+2. **Duplicate `telephone` Services:** `wizardsphone.yaml` and `telephonesvc.yaml` both define `telephone` in `village`.
+3. **Player pod name:** `player.yaml` names it `playerpod`. The README uses `player`.
+4. **Undefined spells:** `sns`, `use`, `call`, `whisper`, and `lookaround` aren't implemented as aliases.
+5. **Spoiler leak:** The phrase is in plain text in `gatepod.yaml`.
+6. **Undefined story:** The curse, the 7777 line, the wizard's house, and the Tooth Fairy's reward have no content.
