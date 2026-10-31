@@ -17,7 +17,7 @@ spec:
       {
         echo "The doormat is worn, and it has k8s written all over it. Many users must have passed through here before."
         echo
-        echo "As you stumbled over the doormat and pushed it aside, you noticed the same letters on the floor beneath it: nk8s."
+        echo "As you stumbled over the doormat you pushed it aside a bit. You see that there are the same letters on the floor beneath it again: nk8s."
         echo
         echo "But why nk8s when everywhere else it's just k8s?"
         echo
