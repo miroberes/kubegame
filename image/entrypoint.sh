@@ -38,7 +38,7 @@ until [ -n "$(kubectl --kubeconfig "$ADMIN_KUBECONFIG" get nodes -o name 2>/dev/
   elapsed=$((elapsed + 2))
 done
 
-kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready node --all --timeout="${timeout}s" >>"$SETUP_LOG"
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready node --all --timeout="${timeout}s" >>"$SETUP_LOG" 2>&1
 
 # Step 2: create the village namespace, the restricted player identity, and the game objects.
 # The default ServiceAccount is created asynchronously after the API starts; pods need it.
@@ -52,7 +52,7 @@ until kubectl --kubeconfig "$ADMIN_KUBECONFIG" get serviceaccount default -n def
   elapsed=$((elapsed + 2))
 done
 
-kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests >>"$SETUP_LOG"
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests >>"$SETUP_LOG" 2>&1
 
 kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready pod --all -n default --timeout="${timeout}s" >>"$SETUP_LOG" 2>&1 &
 wait_pid=$!
@@ -85,10 +85,10 @@ TOKEN=$(kubectl --kubeconfig "$ADMIN_KUBECONFIG" create token player -n default 
 
 rm -f "$PLAYER_KUBECONFIG"
 kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-cluster kingdom \
-  --server=https://127.0.0.1:6443 --certificate-authority="$CA_FILE" --embed-certs=true >>"$SETUP_LOG"
-kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-credentials player --token="$TOKEN" >>"$SETUP_LOG"
+  --server=https://127.0.0.1:6443 --certificate-authority="$CA_FILE" --embed-certs=true >>"$SETUP_LOG" 2>&1
+kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-credentials player --token="$TOKEN" >>"$SETUP_LOG" 2>&1
 kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-context kingdom \
-  --cluster=kingdom --user=player --namespace=default >>"$SETUP_LOG"
+  --cluster=kingdom --user=player --namespace=default >>"$SETUP_LOG" 2>&1
 kubectl config --kubeconfig="$PLAYER_KUBECONFIG" use-context kingdom >/dev/null
 rm -f "$CA_FILE"
 
