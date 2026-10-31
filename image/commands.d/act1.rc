@@ -51,7 +51,12 @@ describe() {
   elif desc=$(kubectl get service "$1" -o jsonpath='{.metadata.annotations.description}' 2>/dev/null); then
     :
   elif desc=$(kubectl get namespace "$1" -o jsonpath='{.metadata.annotations.description}' 2>/dev/null); then
-    :
+    local cur outside
+    cur=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+    if [ "$cur" != "$1" ]; then
+      outside=$(kubectl get namespace "$1" -o jsonpath='{.metadata.annotations.outside-description}' 2>/dev/null)
+      desc=${outside:-$desc}
+    fi
   else
     echo "There is nothing called $1 here."
     return 1
