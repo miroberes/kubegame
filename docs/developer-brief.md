@@ -15,7 +15,7 @@
 
 | Step | Player action | Solution | Result | Source | Status |
 |---|---|---|---|---|---|
-| 5. Switch village | Runs the command | `switch village` | Unlocks village | None | Undefined. No `village` namespace manifest exists |
+| 5. Enter village | Runs the command | `switch village` | Unlocks village | None | Undefined. No `village` namespace manifest exists |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` | Done. Poster logs hint at the chimney |
 | 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: switch wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` | Partial. See conflicts below |
 | 8. Enter wizard's house | Runs the command | `switch wizardshouse` | Door opens | None | Undefined. Nothing follows this step |

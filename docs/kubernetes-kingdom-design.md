@@ -25,13 +25,13 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 | 1. Start | Reads the welcome page | `curl startgame` | Shows plot and first quest | `default/instructionspod.yaml`, `startgamesvc.yaml` |
 | 2. Inspect gate | Reads gate logs | `kubectl logs gate -c cluelogger` | "Whisper the magic key phrase... under the doormat" | `default/gatepod.yaml` |
 | 3. Find phrase | Searches under the doormat | Phrase is `openplease` | Hint is in the logs only | `gatepod.yaml` (init script) |
-| 4. Whisper | Speaks the phrase | `kubectl exec -it gate -- sh /scripts/check_phrase.sh openplease` | "Correct... Use the command: open gate" | `gatepod.yaml` |
+| 4. Whisper | Speaks the phrase | `kubectl exec -it gate -- sh /scripts/check_phrase.sh openplease` | "Correct... Use the command: enter village" | `gatepod.yaml` |
 
 ### Act II: The Village (`village` namespace)
 
 | Step | Player action | Solution | Result | Source |
 |---|---|---|---|---|
-| 5. Switch village | Runs the command | `switch village` | Player arrives in the village | none yet |
+| 5. Enter village | Runs the command | `switch village` | Player arrives in the village | none yet |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` |
 | 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: switch wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
 | 8. Enter wizard's house | Runs the command | `switch wizardshouse` | Door opens | none yet, nothing follows |
@@ -85,11 +85,11 @@ Extra words the player types land at the end of the expanded command:
 
 ### Naming decision
 
-`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice. It was first renamed to **`enter`**, then to **`switch`**, because `switch` names the action directly (changing the current namespace) and matches the `kubectl config` wording.
+`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice, so it became **`enter`**, which later became **`switch`** for the namespace change. This matches the quest log's own wording ("Enter village", "Enter wizard's house").
 
 Places to update:
 
-- `gatepod.yaml`: success message becomes "Use the command: open gate".
+- `gatepod.yaml`: success message becomes "Use the command: enter village".
 - Telephone operator output (step 7): becomes "Use the command: switch wizardshouse".
 - Steps 5 and 8 in the brief: solutions become `switch village` and `switch wizardshouse`.
 
@@ -97,8 +97,7 @@ Places to update:
 
 - No story lines under errors (aliases cannot see output). The wrapper above fixes this.
 - No "what you actually did" line. The `alias` listing replaces it.
-- `switch nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).
-- `call` needs the full target (`telephone:8081`), with no port shortcut.
+- `switch nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).- `call` needs the full target (`telephone:8081`), with no port shortcut.
 - Aliases only expand in interactive shells, which is fine for a player at a prompt.
 - `call` hard-codes the pod name `player` and its namespace `village` (see open issues and "Acting across namespaces").
 
