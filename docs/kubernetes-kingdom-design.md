@@ -33,8 +33,8 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 |---|---|---|---|---|
 | 5. Enter village | Runs the command | `switch village` | Player arrives in the village | none yet |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` |
-| 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: switch wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
-| 8. Enter wizard's house | Runs the command | `switch wizardshouse` | Door opens | none yet, nothing follows |
+| 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: enter wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
+| 8. Enter wizard's house | Runs the command | `enter wizardshouse` | Door opens | none yet, not designed yet, nothing follows |
 | 9. Call Tooth Fairy | Dials port 8082 | `wget -O - telephone:8082` | Voicemail: teeth, gifts, "tooth's special story" | `toothfairymessagecm.yaml` |
 | 10. Booth clue | Reads booth logs | `kubectl logs telephone-booth` | Recent calls: 8082, 8081, 7777 | `telephone-boothpod.yaml` |
 
@@ -90,14 +90,15 @@ Extra words the player types land at the end of the expanded command:
 Places to update:
 
 - `gatepod.yaml`: success message becomes "Use the command: enter village".
-- Telephone operator output (step 7): becomes "Use the command: switch wizardshouse".
-- Steps 5 and 8 in the brief: solutions become `switch village` and `switch wizardshouse`.
+- Telephone operator output (step 7): becomes "Use the command: enter wizardshouse".
+- Step 5 in the brief: solution becomes `switch village`. Step 8 stays `enter wizardshouse` until its design exists.
 
 ### Known limits of plain aliases
 
 - No story lines under errors (aliases cannot see output). The wrapper above fixes this.
 - No "what you actually did" line. The `alias` listing replaces it.
-- `switch nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).- `call` needs the full target (`telephone:8081`), with no port shortcut.
+- `switch nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).
+- `call` needs the full target (`telephone:8081`), with no port shortcut.
 - Aliases only expand in interactive shells, which is fine for a player at a prompt.
 - `call` hard-codes the pod name `player` and its namespace `village` (see open issues and "Acting across namespaces").
 
@@ -496,7 +497,7 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 ## 9. Open decisions
 
 - Plain aliases only, or aliases plus the `story` helper?
-- Is the wizard's house a namespace or something smaller? If smaller, should `switch` still cover it?
+- Is the wizard's house a namespace or something smaller? If smaller, should `enter` still cover it?
 - Should the player see a `Forbidden` error early on purpose (a quest line sending them to `village` too soon), or should the story steer them there only after the gate is solved?
 - Should story lines be scenario-specific, error-type-based, or a mix (error-type default with scenario overrides)?
 - What does `use` do?
