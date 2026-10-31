@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kingdom-namespace-reader
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  resourceNames: ["default", "village"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kingdom-namespace-reader
+subjects:
+- kind: ServiceAccount
+  name: player
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: kingdom-namespace-reader
+  apiGroup: rbac.authorization.k8s.io

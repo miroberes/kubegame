@@ -28,10 +28,10 @@ _kingdom_normalize() {
     look|l) verb=lookaround ;;
     examine|x|read|check) verb=inspect ;;
     say|speak) verb=whisper ;;
-    go|walk) verb=enter ;;
+    go|walk) verb=switch ;;
     *) verb=${words[0]} ;;
   esac
-  alias "$verb" >/dev/null 2>&1 || { printf '%s' "$line"; return; }
+  { alias "$verb" || declare -F "$verb"; } >/dev/null 2>&1 || { printf '%s' "$line"; return; }
 
   out=("$verb")
   for word in "${words[@]:1}"; do

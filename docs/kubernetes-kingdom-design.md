@@ -31,10 +31,10 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 
 | Step | Player action | Solution | Result | Source |
 |---|---|---|---|---|
-| 5. Enter village | Runs the command | `enter village` | Player arrives in the village | none yet |
+| 5. Enter village | Runs the command | `switch village` | Player arrives in the village | none yet |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` |
 | 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: enter wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
-| 8. Enter wizard's house | Runs the command | `enter wizardshouse` | Door opens | none yet, nothing follows |
+| 8. Enter wizard's house | Runs the command | `enter wizardshouse` | Door opens | none yet, not designed yet, nothing follows |
 | 9. Call Tooth Fairy | Dials port 8082 | `wget -O - telephone:8082` | Voicemail: teeth, gifts, "tooth's special story" | `toothfairymessagecm.yaml` |
 | 10. Booth clue | Reads booth logs | `kubectl logs telephone-booth` | Recent calls: 8082, 8081, 7777 | `telephone-boothpod.yaml` |
 
@@ -54,7 +54,7 @@ Planned shape: Acts I and II hand the player roles passively. Act III flips this
 ## 3. Design principles (decided)
 
 1. **Stay as close to native Kubernetes as possible.** What the player learns must transfer to a real cluster.
-2. **Namespace switching is never locked.** In real Kubernetes, switching namespace is only a context setting and grants nothing. A gated `enter` would teach the wrong mental model.
+2. **Namespace switching is never locked.** In real Kubernetes, switching namespace is only a context setting and grants nothing. A gated `switch` would teach the wrong mental model.
 3. **RBAC is the real gate.** The `village` namespace exists from the start. "Unlocking" it means the gate puzzle grants the player rights there. A player who skips ahead can arrive early but meets a native `Forbidden` error.
 4. **Commands are visible aliases, not hidden magic.** Raw kubectl is verbose and flag-heavy, so the game offers it as story-voiced commands. The player can always discover the real command by typing `alias`. The command list can itself be a quest.
 5. **Native errors are never replaced, only supplemented.** The native error carries the lesson (user, verb, resource, namespace). An optional story line adds meaning. Story lines contain no technical claims.
@@ -69,42 +69,42 @@ Planned shape: Acts I and II hand the player roles passively. Act III flips this
 ```bash
 alias lookaround='kubectl get pods,services'
 alias inspect='kubectl logs'
-alias enter='kubectl config set-context --current --namespace'
+alias switch='kubectl config set-context --current --namespace'
 alias whisper='kubectl exec -n default gate -- sh /scripts/check_phrase.sh'
 alias call='kubectl exec -n village player -- wget -O -'
 ```
 
-The `-n` flags matter: `kubectl exec` looks in the current namespace, so without them `whisper` and `call` would fail with NotFound as soon as the player has used `enter` to leave the pod's namespace (see "Acting across namespaces" below).
+The `-n` flags matter: `kubectl exec` looks in the current namespace, so without them `whisper` and `call` would fail with NotFound as soon as the player has used `switch` to leave the pod's namespace (see "Acting across namespaces" below).
 
 Extra words the player types land at the end of the expanded command:
 
-- `enter village` runs `kubectl config set-context --current --namespace village`.
+- `switch village` runs `kubectl config set-context --current --namespace village`.
 - `inspect gate -c cluelogger` works as written. The player supplies the container (the Act I lesson). A bare `inspect gate` gets kubectl's own "choose one of" error.
 - `whisper openplease` runs the check script on the gate.
 - `call telephone:8081` and `call chimneysweep` both work.
 
 ### Naming decision
 
-`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice, so it became **`enter`**. This matches the quest log's own wording ("Enter village", "Enter wizard's house").
+`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice, so it became **`switch`** for the namespace change.
 
 Places to update:
 
 - `gatepod.yaml`: success message becomes "Use the command: enter village".
 - Telephone operator output (step 7): becomes "Use the command: enter wizardshouse".
-- Steps 5 and 8 in the brief: solutions become `enter village` and `enter wizardshouse`.
+- Step 5 in the brief: solution becomes `switch village`. Step 8 stays `enter wizardshouse` until its design exists.
 
 ### Known limits of plain aliases
 
 - No story lines under errors (aliases cannot see output). The wrapper above fixes this.
 - No "what you actually did" line. The `alias` listing replaces it.
-- `enter nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).
+- `switch nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).
 - `call` needs the full target (`telephone:8081`), with no port shortcut.
 - Aliases only expand in interactive shells, which is fine for a player at a prompt.
 - `call` hard-codes the pod name `player` and its namespace `village` (see open issues and "Acting across namespaces").
 
 ### Acting across namespaces (two routes)
 
-A pod's namespace is fixed when it is created, so the `player` pod does not move. What `enter` changes is the context's default namespace. Acting across namespaces is normal Kubernetes: any pod can reach any Service in any namespace by a qualified name (`service.namespace`), and short names resolve only within the caller's own namespace. What actually limits reach is RBAC (for kubectl access) and NetworkPolicy (for pod traffic).
+A pod's namespace is fixed when it is created, so the `player` pod does not move. What `switch` changes is the context's default namespace. Acting across namespaces is normal Kubernetes: any pod can reach any Service in any namespace by a qualified name (`service.namespace`), and short names resolve only within the caller's own namespace. What actually limits reach is RBAC (for kubectl access) and NetworkPolicy (for pod traffic).
 
 The player's shell is not inside the cluster, so the `player` pod exists only as a launch point for in-cluster calls. Two common real-world practices exist, and each teaches a different lesson. The game teaches both:
 
@@ -158,7 +158,7 @@ story() {
 
 alias lookaround='story kubectl get pods,services'
 alias inspect='story kubectl logs'
-alias enter='story kubectl config set-context --current --namespace'
+alias switch='story kubectl config set-context --current --namespace'
 alias whisper='story kubectl exec -n default gate -- sh /scripts/check_phrase.sh'
 alias call='story kubectl exec -n village player -- wget -O -'
 ```
@@ -169,7 +169,7 @@ Notes:
 - Fade-out: making `story` an empty pass-through in Act III returns the commands to plain native behavior.
 - Keep matches narrow (Forbidden, NotFound). A wrong story line over a different real error is worse than none.
 - Raw commands (`kubectl exec`, `wget`) bypass this layer, so players will see story lines only when they use commands.
-- A fuller function-based prototype (with an `enter` existence check, a `call <port>` shortcut, and a "command behind the command" line) was drafted in `commands.sh`. It was judged more than needed for a first version.
+- A fuller function-based prototype (with a `switch` existence check, a `call <port>` shortcut, and a "command behind the command" line) was drafted in `commands.sh`. It was judged more than needed for a first version.
 
 ### Story layer via a kubectl wrapper (preferred)
 
@@ -464,7 +464,7 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 1. **Port 8082 conflict:** `wizardsphone.yaml` says "Wrong number" while the operator pod serves the Tooth Fairy.
 2. **Duplicate `telephone` Services:** `wizardsphone.yaml` and `telephonesvc.yaml` both define `telephone` in `village`.
 3. **Player pod name:** `player.yaml` names it `playerpod`, the README uses `player`. Decision: the pod is `player` (matches the README and the other pods' naming), the RBAC identity is `player-sa`. `player.yaml` and its pod name need updating.
-4. **Undefined commands:** `use` and the final definitions of the others (see section 4). `sns` is replaced by `enter`.
+4. **Undefined commands:** `use` and the final definitions of the others (see section 4). `sns` is replaced by `switch`.
 5. **Spoiler leak:** the phrase is plain text in `gatepod.yaml`. RBAC probably does not fix this (see the correction in section 5). Move the phrase out of the pod spec.
 6. **Undefined story:** the curse, the 7777 line, the wizard's house, and the Tooth Fairy's reward have no content.
 
@@ -517,7 +517,7 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 
 ## 10. Suggested build order
 
-1. Settle the open issues: 8082 conflict, duplicate `telephone` Service, `player` vs `playerpod`, and rename `sns` to `enter` in the manifests.
+1. Settle the open issues: 8082 conflict, duplicate `telephone` Service, `player` vs `playerpod`, and rename `sns` to `switch` in the manifests.
 2. Create the restricted player identity and the Act I RBAC, with the RoleBinding created on solving the gate.
 3. Run the `--privileged` narrowing experiment, then build the single container: k3s, manifests, non-root player user, restricted kubeconfig, aliases, kubectl wrapper, startup script, and a working `startgame`.
 4. Give the wizard's house and the Tooth Fairy real payoffs.
