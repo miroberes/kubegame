@@ -25,16 +25,16 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 | 1. Start | Reads the welcome page | `curl startgame` | Shows plot and first quest | `default/instructionspod.yaml`, `startgamesvc.yaml` |
 | 2. Inspect gate | Reads gate logs | `kubectl logs gate -c cluelogger` | "Whisper the magic key phrase... under the doormat" | `default/gatepod.yaml` |
 | 3. Find phrase | Searches under the doormat | Phrase is `openplease` | Hint is in the logs only | `gatepod.yaml` (init script) |
-| 4. Whisper | Speaks the phrase | `kubectl exec -it gate -- sh /scripts/check_phrase.sh openplease` | "Correct... Use the spell: enter village" | `gatepod.yaml` |
+| 4. Whisper | Speaks the phrase | `kubectl exec -it gate -- sh /scripts/check_phrase.sh openplease` | "Correct... Use the command: enter village" | `gatepod.yaml` |
 
 ### Act II: The Village (`village` namespace)
 
 | Step | Player action | Solution | Result | Source |
 |---|---|---|---|---|
-| 5. Enter village | Casts the spell | `enter village` | Player arrives in the village | none yet |
+| 5. Enter village | Runs the command | `enter village` | Player arrives in the village | none yet |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` |
-| 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the spell: enter wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
-| 8. Enter wizard's house | Casts the spell | `enter wizardshouse` | Door opens | none yet, nothing follows |
+| 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: enter wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
+| 8. Enter wizard's house | Runs the command | `enter wizardshouse` | Door opens | none yet, nothing follows |
 | 9. Call Tooth Fairy | Dials port 8082 | `wget -O - telephone:8082` | Voicemail: teeth, gifts, "tooth's special story" | `toothfairymessagecm.yaml` |
 | 10. Booth clue | Reads booth logs | `kubectl logs telephone-booth` | Recent calls: 8082, 8081, 7777 | `telephone-boothpod.yaml` |
 
@@ -42,7 +42,7 @@ Cross-namespace note: the `player` pod stays in `village`. See "Acting across na
 
 ### Act III: Roles (not started)
 
-- After unlocking a namespace, a spell updates the player's role.
+- After unlocking a namespace, a command updates the player's role.
 - Players switch context to another user to gain access.
 - Players learn to create CSRs for users.
 - Players contrast identity types: they start as a ServiceAccount (a real API object) and later learn that a certificate user such as `king` is only a name in a certificate.
@@ -56,13 +56,13 @@ Planned shape: Acts I and II hand the player roles passively. Act III flips this
 1. **Stay as close to native Kubernetes as possible.** What the player learns must transfer to a real cluster.
 2. **Namespace switching is never locked.** In real Kubernetes, switching namespace is only a context setting and grants nothing. A gated `enter` would teach the wrong mental model.
 3. **RBAC is the real gate.** The `village` namespace exists from the start. "Unlocking" it means the gate puzzle grants the player rights there. A player who skips ahead can arrive early but meets a native `Forbidden` error.
-4. **Spells are visible aliases, not hidden magic.** Raw kubectl is verbose and flag-heavy, so the game offers it as story-voiced spells. The player can always discover the real command by typing `alias`. The spellbook can itself be a quest.
+4. **Commands are visible aliases, not hidden magic.** Raw kubectl is verbose and flag-heavy, so the game offers it as story-voiced commands. The player can always discover the real command by typing `alias`. The command list can itself be a quest.
 5. **Native errors are never replaced, only supplemented.** The native error carries the lesson (user, verb, resource, namespace). An optional story line adds meaning. Story lines contain no technical claims.
-6. **Fade the training wheels over the acts.** Act I leans on spells, Act II mixes spells and raw commands, Act III is raw kubectl, because roles, contexts, and CSRs have no good shortcut.
+6. **Fade the training wheels over the acts.** Act I leans on story commands, Act II mixes story commands and raw commands, Act III is raw kubectl, because roles, contexts, and CSRs have no good shortcut.
 
 ---
 
-## 4. The spells
+## 4. The commands
 
 ### Definitions (aliases)
 
@@ -85,12 +85,12 @@ Extra words the player types land at the end of the expanded command:
 
 ### Naming decision
 
-`sns` (the original namespace-switch spell) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other spell is a verb in the story's voice, so it became **`enter`**. This matches the quest log's own wording ("Enter village", "Enter wizard's house").
+`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice, so it became **`enter`**. This matches the quest log's own wording ("Enter village", "Enter wizard's house").
 
 Places to update:
 
-- `gatepod.yaml`: success message becomes "Use the spell: enter village".
-- Telephone operator output (step 7): becomes "Use the spell: enter wizardshouse".
+- `gatepod.yaml`: success message becomes "Use the command: enter village".
+- Telephone operator output (step 7): becomes "Use the command: enter wizardshouse".
 - Steps 5 and 8 in the brief: solutions become `enter village` and `enter wizardshouse`.
 
 ### Known limits of plain aliases
@@ -125,14 +125,14 @@ Validation looks at cluster state, not at how the player got there, so both rout
 
 Notes:
 
-- **Spells:** `call` stays an alias for Route A. Route B is taught as the raw `kubectl run` command, since Act II is where raw commands start to appear.
+- **Commands:** `call` stays an alias for Route A. Route B is taught as the raw `kubectl run` command, since Act II is where raw commands start to appear.
 - **Story:** a line such as "your voice travels back through the village telephone" can explain why a call from the wizard's house originates in the village.
 - **NetworkPolicy:** a policy in the wizard's house treats traffic from the `village` pod as external. Make that deliberate, not accidental.
 - **RBAC and images for Route B:** see section 5 and the open issues.
 
 ### Optional: story layer via a shared helper
 
-If story lines are wanted, aliases can point at one helper function. The spells stay aliases and `alias` still shows the real command, now prefixed with `story`.
+If story lines are wanted, aliases can point at one helper function. The commands stay aliases and `alias` still shows the real command, now prefixed with `story`.
 
 ```bash
 story() {
@@ -166,10 +166,10 @@ alias call='story kubectl exec -n village player -- wget -O -'
 Notes:
 
 - Output format is layered: native error first, then the story line. Unknown errors get no story line.
-- Fade-out: making `story` an empty pass-through in Act III returns the spells to plain native behavior.
+- Fade-out: making `story` an empty pass-through in Act III returns the commands to plain native behavior.
 - Keep matches narrow (Forbidden, NotFound). A wrong story line over a different real error is worse than none.
-- Raw commands (`kubectl exec`, `wget`) bypass this layer, so players will see story lines only when they use spells.
-- A fuller function-based prototype (with an `enter` existence check, a `call <port>` shortcut, and a "spell behind the spell" line) was drafted in `spells.sh`. It was judged more than needed for a first version.
+- Raw commands (`kubectl exec`, `wget`) bypass this layer, so players will see story lines only when they use commands.
+- A fuller function-based prototype (with an `enter` existence check, a `call <port>` shortcut, and a "command behind the command" line) was drafted in `commands.sh`. It was judged more than needed for a first version.
 
 ### Story layer via a kubectl wrapper (preferred)
 
@@ -177,8 +177,8 @@ Because the player's shell lives in the game's own container (section 6), the st
 
 Benefits over the `story` helper:
 
-- Story lines appear whether the player used a spell **or** the raw `kubectl` command, so behavior is consistent.
-- The spells go back to being plain aliases of `kubectl ...`, so `alias` shows the real command with no `story` prefix.
+- Story lines appear whether the player used a story command **or** the raw `kubectl` command, so behavior is consistent.
+- The commands go back to being plain aliases of `kubectl ...`, so `alias` shows the real command with no `story` prefix.
 - The fade-out is one switch: in Act III the wrapper stops adding lines.
 
 Sketch (must be tested, see cautions below):
@@ -212,7 +212,7 @@ fi
 exit $rc
 ```
 
-Spells then become plain aliases again (as in the definitions above).
+Commands then become plain aliases again (as in the definitions above).
 
 The current act is read from a ConfigMap in the cluster (the player's role needs `get` on that one object), so progress is state in Kubernetes and not a side file. The cost is one extra API call per command. A plain file inside the container would also work, since nothing leaves the container, but the cluster-state version matches the state-based principle.
 
@@ -221,7 +221,7 @@ Cautions:
 - **Keep stdout, stderr, and the exit status intact.** Scripts and any validator that calls kubectl depend on them.
 - **Test interactive modes** (`exec -it`, `logs -f`, `edit`, `port-forward`). Copying stderr as it streams avoids buffering, but the ordering of the story line after the native error needs checking.
 - **Keep matches narrow** (Forbidden, NotFound). An unrecognized error gets no story line.
-- **Be honest about it.** Players on a real cluster will not have the wrapper. The fade-out handles this, and a short intro note or a spellbook quest can reveal it.
+- **Be honest about it.** Players on a real cluster will not have the wrapper. The fade-out handles this, and a short intro note or a command-list quest can reveal it.
 - **Limits:** it only sees output in the player's shell. Errors inside pods (application logs) are game content you control anyway.
 
 The `story` helper above remains the fallback if the player's shell is ever not in the game container.
@@ -250,7 +250,7 @@ The village exists from the start. Access is controlled by RBAC.
 - **Who creates the RoleBinding.** Two options. In-cluster: `check_phrase.sh` creates it, which keeps all puzzle logic inside Kubernetes (more native) but requires the gate's ServiceAccount to have `create` on rolebindings and `bind` on the Role. Engine-side: the container's startup/engine script, holding the admin credentials, creates it after observing the solved state (no `bind` setup needed, but puzzle logic lives outside the world).
 - **Minimum first grant.** Step 6 needs `pods/exec` in `village` (the player pod lives there). The wizard's house gets its own binding when the telephone puzzle is solved.
 - **Throwaway-pod route (section 4).** Creating a pod in a namespace is a permission the player earns through that namespace's RoleBinding, so the unlock has a visible effect. `kubectl run -it --rm` needs more than `create` on pods: it also has to watch the pod, attach to it, and delete it afterward. The exact verbs and subresources must be tested. A `Forbidden` on creation is a good trigger for a story line.
-- **Namespace lookups.** If a spell checks that a namespace exists, the player's role needs `get` on namespaces.
+- **Namespace lookups.** If a command checks that a namespace exists, the player's role needs `get` on namespaces.
 - **What RBAC does not control.** In-cluster traffic such as the `wget` calls between pods is unaffected. Act II's "locks" are RBAC (kubectl access), while its "puzzles" are networking. Keep these separate when designing content.
 - **Spoiler leak (correction).** An earlier version of this document claimed that restricting `get pod gate -o yaml` closes the leak. That is probably wrong: `kubectl logs` and `kubectl exec` first fetch the pod, so the player needs `get` on pods, and with it `kubectl get pod gate -o yaml` works too (restricting by `resourceNames` limits which pods, not what is shown). If the phrase sits in the pod spec (command or args), it is readable. Mitigation to test: keep the phrase out of the spec, for example in a Secret the init script reads (the spec then shows only a reference, and the player has no rights on secrets), or inside the image. A player can still read the script from inside the pod, which is a legitimate advanced move. Verify the `get` requirement on the pinned kubectl version.
 
@@ -311,7 +311,7 @@ Container
 ├── game manifests (baked into the image, applied at startup)
 ├── startup/engine script (admin credentials, RBAC setup, progress state)
 └── player shell (non-root user)
-    ├── spells (aliases)
+    ├── commands (aliases)
     ├── kubectl story wrapper
     ├── Bash, Vim, basic utilities
     └── restricted kubeconfig only
@@ -334,7 +334,7 @@ k3s writes an admin kubeconfig inside the container. If the player's shell ran a
 
 This is flavor-level protection, not a hard boundary. A determined player who controls Docker can always `docker exec` as root, which is acceptable for a learning game.
 
-### Installing the spells and the story layer
+### Installing the commands and the story layer
 
 Everything is baked into the image at build time. The player installs nothing.
 
@@ -342,7 +342,7 @@ Everything is baked into the image at build time. The player installs nothing.
 |---|---|
 | `/usr/local/libexec/kubectl.real` | The real kubectl, pinned and checksum-verified at build time, not on `PATH` |
 | `/usr/local/bin/kubectl` | The wrapper script (section 4), which calls the real binary by absolute path |
-| `/etc/kingdom/spells.rc` | The aliases, sourced from `/etc/bash.bashrc` |
+| `/etc/kingdom/commands.rc` | The aliases, sourced from `/etc/bash.bashrc` |
 | `/game/manifests/` | The game manifests applied at startup |
 
 The wrapper intercepts a plain `kubectl` because `/usr/local/bin` precedes `/usr/bin` on `PATH`. Build-time test: `command -v kubectl` must return `/usr/local/bin/kubectl`.
@@ -370,14 +370,14 @@ RUN mkdir -p /usr/local/libexec \
 # k3s (download, pin, and verify per the k3s release process)
 # ...
 
-# Player user, wrapper, spells, manifests, entrypoint
+# Player user, wrapper, commands, manifests, entrypoint
 RUN useradd -m player
 COPY workstation/kubectl-wrapper /usr/local/bin/kubectl
-COPY workstation/spells.rc       /etc/kingdom/spells.rc
+COPY workstation/commands.rc       /etc/kingdom/commands.rc
 COPY manifests/                  /game/manifests/
 COPY entrypoint.sh               /entrypoint.sh
 RUN chmod 0755 /usr/local/bin/kubectl /entrypoint.sh \
- && echo 'source /etc/kingdom/spells.rc' >> /etc/bash.bashrc
+ && echo 'source /etc/kingdom/commands.rc' >> /etc/bash.bashrc
 ENTRYPOINT ["/entrypoint.sh"]
 ```
 
@@ -464,7 +464,7 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 1. **Port 8082 conflict:** `wizardsphone.yaml` says "Wrong number" while the operator pod serves the Tooth Fairy.
 2. **Duplicate `telephone` Services:** `wizardsphone.yaml` and `telephonesvc.yaml` both define `telephone` in `village`.
 3. **Player pod name:** `player.yaml` names it `playerpod`, the README uses `player`. Decision: the pod is `player` (matches the README and the other pods' naming), the RBAC identity is `player-sa`. `player.yaml` and its pod name need updating.
-4. **Undefined spells:** `use` and the final definitions of the others (see section 4). `sns` is replaced by `enter`.
+4. **Undefined commands:** `use` and the final definitions of the others (see section 4). `sns` is replaced by `enter`.
 5. **Spoiler leak:** the phrase is plain text in `gatepod.yaml`. RBAC probably does not fix this (see the correction in section 5). Move the phrase out of the pod spec.
 6. **Undefined story:** the curse, the 7777 line, the wizard's house, and the Tooth Fairy's reward have no content.
 
@@ -532,4 +532,4 @@ The local-kubernetes-game specification targets CKAD/CKA/CKS drills with real to
 
 It does not adopt its Compose + kind architecture, because that needs the Docker socket and host bind mounts, which violates this game's rule of touching nothing on the host (section 6). The single self-contained container delivers the same player experience inside one container.
 
-The two can be seen as a progression. The story game's spells fade out until Act III is plain kubectl, and that end state is where exam-style practice begins. The specification's own caveat applies to its scope, not ours: node-level CKA/CKS tasks (etcd, kubelet, control-plane services) cannot be reproduced on kind or k3s in a container, but this game's content is API-level. Keep the cluster backend replaceable anyway.
+The two can be seen as a progression. The story game's commands fade out until Act III is plain kubectl, and that end state is where exam-style practice begins. The specification's own caveat applies to its scope, not ours: node-level CKA/CKS tasks (etcd, kubelet, control-plane services) cannot be reproduced on kind or k3s in a container, but this game's content is API-level. Keep the cluster backend replaceable anyway.
