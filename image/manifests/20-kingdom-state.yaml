@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kingdom-state
+  namespace: default
+data:
+  act: "1"

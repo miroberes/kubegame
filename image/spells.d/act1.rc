@@ -1,0 +1,4 @@
+alias lookaround='kubectl get pods,services'
+alias inspect='kubectl logs'
+alias enter='kubectl config set-context --current --namespace'
+alias whisper='kubectl exec gate -- sh /scripts/check_phrase.sh'

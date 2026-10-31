@@ -82,7 +82,7 @@ rm -f "$CA_FILE"
 chown -R "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.kube"
 chmod 0600 "$PLAYER_KUBECONFIG"
 
-printf 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nexport KUBECONFIG=%s\n' "$PLAYER_KUBECONFIG" >"$PLAYER_HOME/.profile"
+printf 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nexport KUBECONFIG=%s\n. /etc/kingdom/spells.sh\n' "$PLAYER_KUBECONFIG" >"$PLAYER_HOME/.profile"
 chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.profile"
 
 # Step 4: welcome text.
