@@ -24,7 +24,7 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 |---|---|---|---|---|
 | 1. Start | Reads the welcome page | `curl startgame` | Shows plot and first quest | `default/instructionspod.yaml`, `startgamesvc.yaml` |
 | 2. Inspect gate | Reads gate logs | `kubectl logs gate -c cluelogger` | "Whisper the magic key phrase... under the doormat" | `default/gatepod.yaml` |
-| 3. Find phrase | Searches under the doormat | Phrase is `openk8s`; visible part `k8s` shows in the gate's description | Description comes from `inspect gate` | `gatepod.yaml` (cluelogger), `06-doormat.yaml` |
+| 3. Find phrase | Runs `inspect doormat` | Phrase is `openk8s`; the gate shows `k8s`, and the floor under the doormat shows `nk8s` | Descriptions come from `inspect gate` and `inspect doormat` | `gatepod.yaml` (cluelogger), `08-doormat-pod.yaml`, `06-doormat.yaml` |
 | 4. Whisper | Speaks the phrase | `kubectl exec -it gate -- sh /scripts/check_phrase.sh openk8s` | "Correct... Use the command: open gate" | `gatepod.yaml` |
 
 ### Act II: The Village (`village` namespace)
