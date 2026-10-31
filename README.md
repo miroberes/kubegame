@@ -42,7 +42,7 @@ inspect poster - logs from the poster give clues, to lookaround and find a way t
 player needs to 'call' chimneysweep
 
 --- user can not view namespaces per role
--- after unlocking a namespace, the role should be updated by issuing a "spell".
+-- after unlocking a namespace, the role should be updated by issuing a "command".
 - proposition
 to get a new role, player switches to a new context in which he is another user with another role, allowing to see more
 -- learn to create csr for users
@@ -53,7 +53,7 @@ players start in the default namespace.
 a player is represented by the pod player
 k run player --image busybox:musl --command -- sh -c "sleep infinity"
 
-To "do things", player needs to issue kubectl commands and their aliases as spells, edit existing kubernetes objects.
+To "do things", player needs to issue kubectl commands and their aliases, edit existing kubernetes objects.
 for example - kubectl exec player -it -- ...
 
 there is a player pod in each of the namespaces, having role and rolebinding for the current namespace ???

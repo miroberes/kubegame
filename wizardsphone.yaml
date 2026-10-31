@@ -46,7 +46,7 @@ metadata:
   namespace: village
 data:
   index.html: |
-    Hello, this is Wizard. You may come to my house, to open the door use the spell: sns wizardshouse
+    Hello, this is Wizard. You may come to my house, to open the door use the command: sns wizardshouse
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -39,7 +39,7 @@ spec:
       echo $1
       if [ "$1" = "$SECRET_PHRASE" ]; then
         /tools/kubectl patch configmap kingdom-state -n default --type merge -p '{"data":{"act":"2"}}' >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
-        echo "Correct magic key phrase! You may proceed to the village. Use the spell: enter village"
+        echo "Correct magic key phrase! You may proceed to the village. Use the command: enter village"
       else
         echo "Incorrect magic key phrase. Try again."
       fi
