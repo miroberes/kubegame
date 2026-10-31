@@ -1,7 +1,7 @@
 apiVersion: v1
 data:
   index.html: |
-    Hello, this is Wizard. You may come to my house, to open the door use the command: enter wizardshouse
+    Hello, this is Wizard. You may come to my house, to open the door use the command: switch wizardshouse
 kind: ConfigMap
 metadata:
   name: wizardsmessage

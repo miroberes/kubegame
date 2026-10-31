@@ -1,6 +1,6 @@
 alias lookaround='kubectl get pods,services'
 alias inspect='kubectl logs -c cluelogger'
-alias enter='kubectl config set-context --current --namespace'
+alias switch='kubectl config set-context --current --namespace'
 alias whisper='kubectl exec gate -c cluelogger -- sh /scripts/check_phrase.sh'
 alias open='kubectl exec gate -c cluelogger -- sh -c "[ \"\$(/tools/kubectl get configmap kingdom-state -n default -o jsonpath={.data.gate})\" = unlocked ] && /tools/kubectl create rolebinding act2-player --role=act2-player --serviceaccount=default:player -n village && /tools/kubectl patch configmap kingdom-state -n default --type merge -p '\''{\"data\":{\"act\":\"2\"}}'\'' || echo \"The gate is still locked.\""'
 alias clue='kubectl exec gate -c cluelogger -- wget -q -O - http://clue'
