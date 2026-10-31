@@ -23,6 +23,7 @@ spec:
     - mountPath: /doormat
       name: doormat-volume
       readOnly: true
+  initContainers:
   - command:
     - /bin/sh
     - -c
