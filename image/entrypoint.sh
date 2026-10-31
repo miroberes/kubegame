@@ -9,6 +9,7 @@ fi
 
 ADMIN_KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 K3S_LOG=/var/log/k3s.log
+SETUP_LOG=/var/log/kingdom-setup.log
 
 # Step 1: start k3s and wait until the API server and node are ready.
 mkdir -p "$(dirname "$K3S_LOG")"
@@ -37,7 +38,7 @@ until [ -n "$(kubectl --kubeconfig "$ADMIN_KUBECONFIG" get nodes -o name 2>/dev/
   elapsed=$((elapsed + 2))
 done
 
-kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready node --all --timeout="${timeout}s"
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready node --all --timeout="${timeout}s" >>"$SETUP_LOG"
 
 # Step 2: create the village namespace, the restricted player identity, and the game objects.
 # The default ServiceAccount is created asynchronously after the API starts; pods need it.
@@ -51,7 +52,7 @@ until kubectl --kubeconfig "$ADMIN_KUBECONFIG" get serviceaccount default -n def
   elapsed=$((elapsed + 2))
 done
 
-kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests >>"$SETUP_LOG"
 
 # Step 3: give the player a restricted kubeconfig. The admin kubeconfig stays root-only.
 PLAYER_USER=player
@@ -72,10 +73,10 @@ TOKEN=$(kubectl --kubeconfig "$ADMIN_KUBECONFIG" create token player -n default 
 
 rm -f "$PLAYER_KUBECONFIG"
 kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-cluster kingdom \
-  --server=https://127.0.0.1:6443 --certificate-authority="$CA_FILE" --embed-certs=true
-kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-credentials player --token="$TOKEN"
+  --server=https://127.0.0.1:6443 --certificate-authority="$CA_FILE" --embed-certs=true >>"$SETUP_LOG"
+kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-credentials player --token="$TOKEN" >>"$SETUP_LOG"
 kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-context kingdom \
-  --cluster=kingdom --user=player --namespace=default
+  --cluster=kingdom --user=player --namespace=default >>"$SETUP_LOG"
 kubectl config --kubeconfig="$PLAYER_KUBECONFIG" use-context kingdom >/dev/null
 rm -f "$CA_FILE"
 
