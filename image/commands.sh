@@ -31,7 +31,7 @@ _kingdom_normalize() {
     go|walk) verb=switch ;;
     *) verb=${words[0]} ;;
   esac
-  alias "$verb" >/dev/null 2>&1 || { printf '%s' "$line"; return; }
+  { alias "$verb" || declare -F "$verb"; } >/dev/null 2>&1 || { printf '%s' "$line"; return; }
 
   out=("$verb")
   for word in "${words[@]:1}"; do
