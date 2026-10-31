@@ -61,7 +61,7 @@ PLAYER_KUBECONFIG=$PLAYER_HOME/.kube/config
 chmod 0600 "$ADMIN_KUBECONFIG"
 mkdir -p /home
 if ! id "$PLAYER_USER" >/dev/null 2>&1; then
-  adduser -D -h "$PLAYER_HOME" -s /bin/sh "$PLAYER_USER"
+  adduser -D -h "$PLAYER_HOME" -s /bin/bash "$PLAYER_USER"
 fi
 mkdir -p "$(dirname "$PLAYER_KUBECONFIG")"
 
