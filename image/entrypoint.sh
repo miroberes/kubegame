@@ -99,6 +99,7 @@ printf 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.profile"
 
 # Step 4: welcome text.
+printf '\n'
 cat /game/welcome.txt
 
 # Step 5: replace this process with the player's login shell, running as the unprivileged user.

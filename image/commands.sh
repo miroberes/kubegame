@@ -14,6 +14,7 @@ _kingdom_load_commands() {
   done
 }
 
+PS0='\n'
 PROMPT_COMMAND='printf "\n"; _kingdom_load_commands'
 
 # Rewrites a typed line before it runs: maps synonyms to command names and drops filler words.
