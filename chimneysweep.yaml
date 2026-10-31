@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: chimneysweep
   namespace: village
+  labels:
+    listed-in: village
 spec:
   ports:
   - port: 80

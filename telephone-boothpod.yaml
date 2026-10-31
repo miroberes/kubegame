@@ -3,6 +3,7 @@ kind: Pod
 metadata:
   labels:
     run: telephone-booth
+    listed-in: village
   name: telephone-booth
   namespace: village
 spec:

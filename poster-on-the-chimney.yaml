@@ -5,6 +5,7 @@ metadata:
   namespace: village
   labels:
     run: poster-on-the-chimney
+    listed-in: village
 spec:
   initContainers:
   - name: cluelogger

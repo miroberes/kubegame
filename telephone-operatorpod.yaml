@@ -3,6 +3,7 @@ kind: Pod
 metadata:
   labels:
     app: telephone-operator
+    listed-in: village
   name: telephone-operator
   namespace: village
 spec:
