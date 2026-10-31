@@ -4,6 +4,7 @@ metadata:
   name: gate
   namespace: default
 spec:
+  serviceAccountName: gate
   containers:
   - command:
     - /bin/sh
@@ -12,28 +13,43 @@ spec:
       echo 'To open you need to -whisper- the magic key phrase.
       It is, pssst... under the doormat.' > /dev/stderr; sleep infinity
     image: busybox
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     name: cluelogger
     volumeMounts:
     - mountPath: /scripts
       name: script-volume
+    - mountPath: /tools
+      name: tools-volume
   initContainers:
+  - command:
+    - /bin/sh
+    - -c
+    - cp -L /bin/kubectl /tools/kubectl && chmod 0755 /tools/kubectl
+    image: rancher/k3s:v1.33.4-k3s1
+    imagePullPolicy: IfNotPresent
+    name: copy-kubectl
+    volumeMounts:
+    - mountPath: /tools
+      name: tools-volume
   - args:
     - |
-      echo '#!/bin/sh' > /scripts/check_phrase.sh;
-      echo 'SECRET_PHRASE="openplease"' >> /scripts/check_phrase.sh;
-      echo 'echo $1' >> /scripts/check_phrase.sh;
-      echo 'if [ "$1" = "$SECRET_PHRASE" ]; then' >> /scripts/check_phrase.sh;
-      echo '  echo "Correct magic key phrase! You may proceed to the village. Use the spell: enter village"' >> /scripts/check_phrase.sh;
-      echo 'else' >> /scripts/check_phrase.sh;
-      echo '  echo "Incorrect magic key phrase. Try again."' >> /scripts/check_phrase.sh;
-      echo 'fi' >> /scripts/check_phrase.sh;
+      cat > /scripts/check_phrase.sh <<'SCRIPT'
+      #!/bin/sh
+      SECRET_PHRASE="openplease"
+      echo $1
+      if [ "$1" = "$SECRET_PHRASE" ]; then
+        /tools/kubectl patch configmap kingdom-state -n default --type merge -p '{"data":{"act":"2"}}' >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
+        echo "Correct magic key phrase! You may proceed to the village. Use the spell: enter village"
+      else
+        echo "Incorrect magic key phrase. Try again."
+      fi
+      SCRIPT
       chmod +x /scripts/check_phrase.sh
     command:
     - /bin/sh
     - -c
     image: busybox
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     name: init-script
     volumeMounts:
     - mountPath: /scripts
@@ -42,3 +58,5 @@ spec:
   volumes:
   - emptyDir: {}
     name: script-volume
+  - emptyDir: {}
+    name: tools-volume
