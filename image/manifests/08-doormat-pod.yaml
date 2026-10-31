@@ -14,5 +14,15 @@ spec:
     - /bin/sh
     - -c
     - |-
-      echo "The doormat is worn, and it has k8s written all over it. Many users must have passed through here before. As you stumbled over the doormat you pushed it aside, you notice the same letters on the floor beneath it: nk8s. Wait, why nk8s when everywhere else it's just k8s?" > /dev/stderr; sleep infinity
+      {
+        echo "The doormat is worn, and it has k8s written all over it. Many users must have passed through here before."
+        echo
+        echo "As you stumbled over the doormat and pushed it aside, you noticed the same letters on the floor beneath it: nk8s."
+        echo
+        echo "But why nk8s when everywhere else it's just k8s?"
+        echo
+        echo "You push the doormat further aside, and now you see why. The writing says: openk8s."
+        echo
+        echo "Wait, if Aladdin's cave opened when he said \"Open Sesame\"..."
+      } > /dev/stderr; sleep infinity
   restartPolicy: Always
