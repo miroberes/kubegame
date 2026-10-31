@@ -85,7 +85,7 @@ Extra words the player types land at the end of the expanded command:
 
 ### Naming decision
 
-`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice, so it became **`switch`** for the namespace change. This matches the quest log's own wording ("Enter village", "Enter wizard's house").
+`sns` (the original namespace-switch command) was dropped. It was an abbreviation, which is the "cryptic raw command" problem in a shorter form. Every other command is a verb in the story's voice, so it became **`switch`** for the namespace change.
 
 Places to update:
 
