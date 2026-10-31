@@ -39,4 +39,18 @@ done
 
 kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready node --all --timeout="${timeout}s"
 
+# Step 2: create the village namespace, the restricted player identity, and the game objects.
+# The default ServiceAccount is created asynchronously after the API starts; pods need it.
+elapsed=0
+until kubectl --kubeconfig "$ADMIN_KUBECONFIG" get serviceaccount default -n default >/dev/null 2>&1; do
+  if [ "$elapsed" -ge "$timeout" ]; then
+    echo "default ServiceAccount not created within ${timeout}s; see $K3S_LOG" >&2
+    exit 1
+  fi
+  sleep 2
+  elapsed=$((elapsed + 2))
+done
+
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests
+
 echo "k3s is ready."
