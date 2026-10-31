@@ -24,7 +24,7 @@ spec:
       echo 'SECRET_PHRASE="openplease"' >> /scripts/check_phrase.sh;
       echo 'echo $1' >> /scripts/check_phrase.sh;
       echo 'if [ "$1" = "$SECRET_PHRASE" ]; then' >> /scripts/check_phrase.sh;
-      echo '  echo "Correct magic key phrase! You may proceed to the village. Use the spell: sns village"' >> /scripts/check_phrase.sh;
+      echo '  echo "Correct magic key phrase! You may proceed to the village. Use the spell: enter village"' >> /scripts/check_phrase.sh;
       echo 'else' >> /scripts/check_phrase.sh;
       echo '  echo "Incorrect magic key phrase. Try again."' >> /scripts/check_phrase.sh;
       echo 'fi' >> /scripts/check_phrase.sh;
