@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: doormat
+  namespace: default
+  labels:
+    run: doormat
+spec:
+  containers:
+  - name: cluelogger
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - |-
+      echo "The doormat is worn, and it has k8s written all over it. Many users must have passed through here before. As you stumbled over the doormat you pushed it aside, you notice the same letters on the floor beneath it: nk8s. Wait, why nk8s when everywhere else it's just k8s?" > /dev/stderr; sleep infinity
+  restartPolicy: Always
