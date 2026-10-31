@@ -27,3 +27,19 @@ switch() {
 }
 alias openk8s='kubectl exec gate -c cluelogger -- sh -c "sh /scripts/check_phrase.sh openk8s && { /tools/kubectl get rolebinding act2-player -n village >/dev/null 2>&1 || /tools/kubectl create rolebinding act2-player --role=act2-player --serviceaccount=default:player -n village >/dev/null; } && /tools/kubectl patch configmap kingdom-state -n default --type merge -p '\''{\"data\":{\"act\":\"2\"}}'\'' >/dev/null"'
 alias clue='kubectl exec gate -c cluelogger -- wget -q -O - http://clue'
+describe() {
+  if [ -z "$1" ]; then
+    echo "usage: describe <name>" >&2
+    return 1
+  fi
+  local desc
+  if desc=$(kubectl get pod "$1" -o jsonpath='{.metadata.annotations.description}' 2>/dev/null); then
+    :
+  elif desc=$(kubectl get service "$1" -o jsonpath='{.metadata.annotations.description}' 2>/dev/null); then
+    :
+  else
+    kubectl get service "$1" >/dev/null || return 1
+  fi
+  echo "${desc:-Nothing special about it.}"
+}
+_kingdom_describe describe "default village" "describe a pod or service you can see, e.g. describe gate"

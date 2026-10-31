@@ -6,6 +6,8 @@ metadata:
   labels:
     run: doormat
     listed-in: default
+  annotations:
+    description: "A doormat lies in front of the gate. You need to go closer and inspect it."
 spec:
   containers:
   - name: cluelogger

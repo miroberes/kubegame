@@ -5,6 +5,8 @@ metadata:
   namespace: default
   labels:
     listed-in: default
+  annotations:
+    description: "A tall iron gate stands in a stone wall. You need to go closer and inspect it."
 spec:
   serviceAccountName: gate
   containers:

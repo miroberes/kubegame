@@ -5,6 +5,8 @@ metadata:
   namespace: village
   labels:
     listed-in: village
+  annotations:
+    description: "The chimneysweep is up on the roof, sweeping the chimney"
 spec:
   ports:
   - port: 80
