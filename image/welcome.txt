@@ -6,4 +6,6 @@ Plot: A mysterious curse has befallen the kingdom. Only the brave who master Kub
 
 Maybe you should -inspect- the gate to learn how it can be opened.
 
+Type -help- at any time to see the commands available here.
+
 Good luck!

@@ -3,6 +3,8 @@ kind: Pod
 metadata:
   name: gate
   namespace: default
+  labels:
+    listed-in: default
 spec:
   serviceAccountName: gate
   containers:

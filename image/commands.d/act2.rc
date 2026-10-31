@@ -1,5 +1,7 @@
 alias call='kubectl exec player-pod -- wget -O -'
+_kingdom_describe call "village" "call a service from your player-pod, e.g. call chimneysweep"
 
 enter() {
   kubectl run player-pod --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity"
 }
+_kingdom_describe enter "village" "create your player-pod in this namespace"

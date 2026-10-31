@@ -4,6 +4,7 @@ metadata:
   labels:
     run: telephone-booth
   name: telephone-booth
+  namespace: village
 spec:
   containers:
   - image: busybox

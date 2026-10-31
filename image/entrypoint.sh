@@ -54,6 +54,18 @@ done
 
 kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests >>"$SETUP_LOG"
 
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" wait --for=condition=Ready pod --all -n default --timeout="${timeout}s" >>"$SETUP_LOG" 2>&1 &
+wait_pid=$!
+spin_i=0
+while kill -0 "$wait_pid" 2>/dev/null; do
+  case $((spin_i % 4)) in 0) spin_c='|' ;; 1) spin_c='/' ;; 2) spin_c='-' ;; *) spin_c='\' ;; esac
+  printf '\rLoading the kingdom %s ' "$spin_c" >&2
+  spin_i=$((spin_i + 1))
+  sleep 0.2
+done
+printf '\r%-30s\r' ' ' >&2
+wait "$wait_pid" || { echo "The kingdom did not finish loading. See $SETUP_LOG" >&2; exit 1; }
+
 # Step 3: give the player a restricted kubeconfig. The admin kubeconfig stays root-only.
 PLAYER_USER=player
 PLAYER_HOME=/home/$PLAYER_USER

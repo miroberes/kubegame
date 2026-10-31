@@ -5,6 +5,7 @@ metadata:
   namespace: default
   labels:
     run: doormat
+    listed-in: default
 spec:
   containers:
   - name: cluelogger
