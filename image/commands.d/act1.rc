@@ -4,6 +4,6 @@ switch() {
   kubectl get namespace "$1" >/dev/null || return 1
   kubectl config set-context --current --namespace="$1"
 }
-alias whisper='kubectl exec gate -c cluelogger -- sh /scripts/check_phrase.sh'
+alias openk8s='kubectl exec gate -c cluelogger -- sh /scripts/check_phrase.sh openk8s'
 alias open='kubectl exec gate -c cluelogger -- sh -c "s=\$(/tools/kubectl get configmap kingdom-state -n default -o jsonpath={.data.gate} 2>&1) || { echo \"\$s\"; exit 1; }; [ \"\$s\" = unlocked ] || { echo \"The gate is still locked.\"; exit 0; }; /tools/kubectl create rolebinding act2-player --role=act2-player --serviceaccount=default:player -n village && /tools/kubectl patch configmap kingdom-state -n default --type merge -p '\''{\"data\":{\"act\":\"2\"}}'\''"'
 alias clue='kubectl exec gate -c cluelogger -- wget -q -O - http://clue'

@@ -23,11 +23,14 @@ _kingdom_normalize() {
   local -a words out
   read -r -a words <<<"$line"
   [ "${#words[@]}" -gt 0 ] || { printf '%s' "$line"; return; }
+  case "${words[0]}" in say|speak) words=("${words[@]:1}") ;; esac
+  if [ "${words[0]:-}" = open ] && [ "${words[1]:-}" = k8s ]; then
+    words=(openk8s "${words[@]:2}")
+  fi
 
   case "${words[0]}" in
     look|l) verb=lookaround ;;
     examine|x|read|check) verb=inspect ;;
-    say|speak) verb=whisper ;;
     go|walk) verb=switch ;;
     *) verb=${words[0]} ;;
   esac
@@ -35,7 +38,7 @@ _kingdom_normalize() {
 
   out=("$verb")
   for word in "${words[@]:1}"; do
-    if [ "$verb" != whisper ]; then
+    if [ "$verb" != openk8s ]; then
       case "$word" in the|a|an|at|to|into) continue ;; esac
     fi
     out+=("$word")
