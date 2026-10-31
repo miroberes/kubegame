@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: doormat
+  namespace: default
+data:
+  magic-key-phrase: openplease

@@ -20,7 +20,9 @@ spec:
       name: script-volume
     - mountPath: /tools
       name: tools-volume
-  initContainers:
+    - mountPath: /doormat
+      name: doormat-volume
+      readOnly: true
   - command:
     - /bin/sh
     - -c
@@ -35,7 +37,7 @@ spec:
     - |
       cat > /scripts/check_phrase.sh <<'SCRIPT'
       #!/bin/sh
-      SECRET_PHRASE="openplease"
+      SECRET_PHRASE=$(cat /doormat/magic-key-phrase)
       echo $1
       if [ "$1" = "$SECRET_PHRASE" ]; then
         /tools/kubectl patch configmap kingdom-state -n default --type merge -p '{"data":{"gate":"unlocked"}}' >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
@@ -60,3 +62,6 @@ spec:
     name: script-volume
   - emptyDir: {}
     name: tools-volume
+  - configMap:
+      name: doormat
+    name: doormat-volume
