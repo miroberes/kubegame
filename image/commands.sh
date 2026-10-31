@@ -40,7 +40,7 @@ _kingdom_normalize() {
   out=("$verb")
   for word in "${words[@]:1}"; do
     if [ "$verb" != openk8s ]; then
-      case "$word" in the|a|an|at|to|into) continue ;; esac
+      case "$word" in the|a|an|at|to|into|on|in|of|for) continue ;; esac
     fi
     out+=("$word")
   done
@@ -49,7 +49,27 @@ _kingdom_normalize() {
 
 if [[ $- == *i* ]]; then
   _kingdom_rewrite_line() {
-    READLINE_LINE=$(_kingdom_normalize "$READLINE_LINE")
+    case "$READLINE_LINE" in
+      "hey chimneysweep"|"hi chimneysweep")
+        _kingdom_talk=chimneysweep
+        READLINE_LINE='printf "%s\n" "Hey, how can I help you?"'
+        ;;
+      *)
+        if [ -n "$_kingdom_talk" ]; then
+          case "$READLINE_LINE" in
+            "read the poster")
+              _kingdom_talk=""
+              READLINE_LINE="call chimneysweep"
+              ;;
+            *)
+              READLINE_LINE='printf "%s\n" "Hey, how can I help you?"'
+              ;;
+          esac
+        else
+          READLINE_LINE=$(_kingdom_normalize "$READLINE_LINE")
+        fi
+        ;;
+    esac
     READLINE_POINT=${#READLINE_LINE}
   }
   bind -x '"\C-x\C-n": _kingdom_rewrite_line'
