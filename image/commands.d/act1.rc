@@ -19,7 +19,6 @@ lookaround() {
 _kingdom_describe lookaround "default" "list the pods and services you can see"
 alias inspect='kubectl logs -c cluelogger'
 _kingdom_describe inspect "default village" "read a pod's clue log"
-_kingdom_describe openk8s "default" "say the passphrase to open the gate"
 _kingdom_describe clue "default" "ask for a hint"
 _kingdom_describe switch "default village" "switch to another namespace, e.g. switch village"
 switch() {
