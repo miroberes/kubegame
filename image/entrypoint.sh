@@ -82,4 +82,7 @@ rm -f "$CA_FILE"
 chown -R "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.kube"
 chmod 0600 "$PLAYER_KUBECONFIG"
 
+printf 'export KUBECONFIG=%s\n' "$PLAYER_KUBECONFIG" >"$PLAYER_HOME/.profile"
+chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.profile"
+
 echo "k3s is ready."
