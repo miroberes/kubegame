@@ -38,7 +38,6 @@ spec:
       cat > /scripts/check_phrase.sh <<'SCRIPT'
       #!/bin/sh
       SECRET_PHRASE=$(cat /doormat/magic-key-phrase)
-      echo $1
       if [ "$1" = "$SECRET_PHRASE" ]; then
         echo "Correct magic key phrase! The gate opens."
       else

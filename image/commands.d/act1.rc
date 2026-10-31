@@ -4,5 +4,5 @@ switch() {
   kubectl get namespace "$1" >/dev/null || return 1
   kubectl config set-context --current --namespace="$1"
 }
-alias openk8s='kubectl exec gate -c cluelogger -- sh -c "sh /scripts/check_phrase.sh openk8s && { /tools/kubectl get rolebinding act2-player -n village >/dev/null 2>&1 || /tools/kubectl create rolebinding act2-player --role=act2-player --serviceaccount=default:player -n village; } && /tools/kubectl patch configmap kingdom-state -n default --type merge -p '\''{\"data\":{\"act\":\"2\"}}'\''"'
+alias openk8s='kubectl exec gate -c cluelogger -- sh -c "sh /scripts/check_phrase.sh openk8s && { /tools/kubectl get rolebinding act2-player -n village >/dev/null 2>&1 || /tools/kubectl create rolebinding act2-player --role=act2-player --serviceaccount=default:player -n village >/dev/null; } && /tools/kubectl patch configmap kingdom-state -n default --type merge -p '\''{\"data\":{\"act\":\"2\"}}'\'' >/dev/null"'
 alias clue='kubectl exec gate -c cluelogger -- wget -q -O - http://clue'
