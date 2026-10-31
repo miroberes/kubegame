@@ -10,8 +10,7 @@ spec:
     - /bin/sh
     - -c
     - |-
-      echo 'To open you need to -whisper- the magic key phrase.
-      It is, pssst... under the doormat.' > /dev/stderr; sleep infinity
+      echo 'A tall iron gate, bolted shut. A doormat lies at its foot, kicked askew, and writing shows beneath it: ...k8s' > /dev/stderr; sleep infinity
     image: busybox
     imagePullPolicy: IfNotPresent
     name: cluelogger
