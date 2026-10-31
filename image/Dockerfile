@@ -23,6 +23,7 @@ VOLUME ["/var/lib/cni", "/var/lib/kubelet", "/var/lib/rancher/k3s", "/var/log"]
 
 COPY image/entrypoint.sh /entrypoint.sh
 RUN chmod 0755 /entrypoint.sh
+COPY image/welcome.txt /game/welcome.txt
 
 # Game manifests. wizardsphone.yaml and wrongnumbermessagecm.yaml are left out
 # until the telephone book replaces the duplicate telephone Service.

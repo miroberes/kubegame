@@ -85,4 +85,8 @@ chmod 0600 "$PLAYER_KUBECONFIG"
 printf 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nexport KUBECONFIG=%s\n' "$PLAYER_KUBECONFIG" >"$PLAYER_HOME/.profile"
 chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.profile"
 
-echo "k3s is ready."
+# Step 4: welcome text.
+cat /game/welcome.txt
+
+# Step 5: replace this process with the player's login shell, running as the unprivileged user.
+exec su -l "$PLAYER_USER" -c "exec bash -l"

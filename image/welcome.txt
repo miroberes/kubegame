@@ -1,0 +1,7 @@
+Welcome to the Kubernetes Kingdom Adventure!
+
+Plot: A mysterious curse has befallen the kingdom. Only the brave who master Kubernetes commands can unlock its secrets and lift the curse.
+
+First Quest: Inspect the "gate" pod to discover how to open the gate and begin your journey.
+
+Good luck!
