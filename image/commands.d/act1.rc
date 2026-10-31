@@ -18,13 +18,25 @@ lookaround() {
   } | awk '{ if (NF > 1) err[$1] = 1; seen[$1] = 1 } END { for (n in seen) printf "  %s%s\n", n, (err[n] ? "  error" : "") }' | sort
 }
 _kingdom_describe lookaround "default" "list the pods and services you can see"
-alias inspect='kubectl logs -c cluelogger'
+inspect() {
+  if [ -z "$1" ]; then
+    echo "usage: inspect <name>" >&2
+    return 1
+  fi
+  local out
+  if out=$(kubectl logs -c cluelogger "$1" 2>/dev/null); then
+    printf '%s\n' "$out"
+  else
+    echo "There is nothing called $1 here."
+    return 1
+  fi
+}
 _kingdom_describe inspect "default village" "read a pod's clue log"
 _kingdom_describe clue "default" "ask for a hint"
 _kingdom_describe switch "default village" "switch to another namespace, e.g. switch village"
 switch() {
   kubectl get namespace "$1" >/dev/null || return 1
-  kubectl config set-context --current --namespace="$1"
+  kubectl config set-context --current --namespace="$1" >/dev/null
 }
 alias openk8s='kubectl exec gate -c cluelogger -- sh -c "sh /scripts/check_phrase.sh openk8s && { /tools/kubectl get rolebinding act2-player -n village >/dev/null 2>&1 || /tools/kubectl create rolebinding act2-player --role=act2-player --serviceaccount=default:player -n village >/dev/null; } && /tools/kubectl patch configmap kingdom-state -n default --type merge -p '\''{\"data\":{\"act\":\"2\"}}'\'' >/dev/null"'
 alias clue='kubectl exec gate -c cluelogger -- wget -q -O - http://clue'
