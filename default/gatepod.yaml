@@ -10,7 +10,7 @@ spec:
     - /bin/sh
     - -c
     - |-
-      echo 'You approached the gate, stumbling over a doormat. The gate has gold letters k8s written on it. There is no doorknob, just a keyhole at mouth height.' > /dev/stderr; sleep infinity
+      echo 'You approached the gate, stumbling over a doormat. The gate has gold letters k8s written on it. There is no doorknob.' > /dev/stderr; sleep infinity
     image: busybox
     imagePullPolicy: IfNotPresent
     name: cluelogger
