@@ -7,6 +7,10 @@ enter() {
     return 1
   fi
   kubectl get namespace "$1" >/dev/null || return 1
+  if [ "$1" = wizardshouse ] && ! kubectl auth can-i create pods -n "$1" >/dev/null 2>&1; then
+    echo "The wizard has not let you in yet."
+    return 1
+  fi
   kubectl run player-pod --namespace="$1" --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity" >/dev/null || return 1
   switch "$1" || return 1
   echo "You entered the $1, look around..."

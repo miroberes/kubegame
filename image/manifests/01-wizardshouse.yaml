@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wizardshouse
+  labels:
+    listed-in: village
+  annotations:
+    description: "A house with a chimney stands at its edge, and something on its roof has caught your eye."
+    outside-description: "A house with a chimney stands at its edge, and something on its roof has caught your eye."

@@ -1,11 +1,15 @@
 lookaround() {
-  local ns pods services name phase svc ips
+  local ns pods services namespaces name phase svc ips
   ns=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
   ns=${ns:-default}
   pods=$(kubectl get pods -l listed-in="$ns" -o go-template='{{range .items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}')
   services=$(kubectl get services -l listed-in="$ns" -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+  namespaces=$(kubectl get namespaces -l listed-in="$ns" -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' 2>/dev/null)
   {
     echo "$ns"
+    while read -r name; do
+      [ -n "$name" ] && echo "$name"
+    done <<<"$namespaces"
     while read -r name phase; do
       [ -n "$name" ] || continue
       if [ "$phase" = Running ]; then echo "$name"; else echo "$name error"; fi
