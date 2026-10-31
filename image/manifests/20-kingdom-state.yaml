@@ -5,3 +5,4 @@ metadata:
   namespace: default
 data:
   act: "1"
+  gate: locked

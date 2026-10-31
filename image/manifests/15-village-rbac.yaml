@@ -23,20 +23,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: act2-binder
-  namespace: village
-rules:
-- apiGroups: ["rbac.authorization.k8s.io"]
-  resources: ["rolebindings"]
-  verbs: ["create"]
-- apiGroups: ["rbac.authorization.k8s.io"]
-  resources: ["roles"]
-  resourceNames: ["act2-player"]
-  verbs: ["bind"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
   name: gate-village
   namespace: village
 rules:
@@ -45,11 +31,11 @@ rules:
   verbs: ["create"]
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["rolebindings"]
-  resourceNames: ["player-binder"]
+  resourceNames: ["act2-player"]
   verbs: ["get"]
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["roles"]
-  resourceNames: ["act2-binder"]
+  resourceNames: ["act2-player"]
   verbs: ["bind"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

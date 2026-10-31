@@ -38,11 +38,8 @@ spec:
       SECRET_PHRASE="openplease"
       echo $1
       if [ "$1" = "$SECRET_PHRASE" ]; then
-        /tools/kubectl patch configmap kingdom-state -n default --type merge -p '{"data":{"act":"2"}}' >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
-        if ! /tools/kubectl get rolebinding player-binder -n village >/dev/null 2>&1; then
-          /tools/kubectl create rolebinding player-binder --role=act2-binder --serviceaccount=default:player -n village >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
-        fi
-        echo "Correct magic key phrase! You may proceed to the village. Use the command: enter village"
+        /tools/kubectl patch configmap kingdom-state -n default --type merge -p '{"data":{"gate":"unlocked"}}' >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
+        echo "Correct magic key phrase! The gate is unlocked. Use the command: open gate"
       else
         echo "Incorrect magic key phrase. Try again."
       fi
