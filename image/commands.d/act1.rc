@@ -1,5 +1,25 @@
-alias lookaround='kubectl get pods,services -l kingdom/visible=true'
+lookaround() {
+  local pods services name phase svc ips
+  pods=$(kubectl get pods -l kingdom/visible=true -o go-template='{{range .items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}')
+  services=$(kubectl get services -l kingdom/visible=true -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+  {
+    while read -r name phase; do
+      [ -n "$name" ] || continue
+      if [ "$phase" = Running ]; then echo "$name"; else echo "$name error"; fi
+    done <<<"$pods"
+    while read -r svc; do
+      [ -n "$svc" ] || continue
+      ips=$(kubectl get endpoints "$svc" -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null)
+      if [ -n "$ips" ]; then echo "$svc"; else echo "$svc error"; fi
+    done <<<"$services"
+  } | awk '{ if (NF > 1) err[$1] = 1; seen[$1] = 1 } END { for (n in seen) printf "  %s%s\n", n, (err[n] ? "  error" : "") }' | sort
+}
+_kingdom_describe lookaround "default" "list the pods and services you can see"
 alias inspect='kubectl logs -c cluelogger'
+_kingdom_describe inspect "default village" "read a pod's clue log"
+_kingdom_describe openk8s "default" "say the passphrase to open the gate"
+_kingdom_describe clue "default" "ask for a hint"
+_kingdom_describe switch "default village" "switch to another namespace, e.g. switch village"
 switch() {
   kubectl get namespace "$1" >/dev/null || return 1
   kubectl config set-context --current --namespace="$1"

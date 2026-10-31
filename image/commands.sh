@@ -55,3 +55,23 @@ if [[ $- == *i* ]]; then
   # Enter first rewrites the line, then accepts it.
   bind '"\C-m": "\C-x\C-n\C-j"'
 fi
+
+_kingdom_help_entries=()
+
+_kingdom_describe() {
+  _kingdom_help_entries+=("$1|$2|$3")
+}
+
+help() {
+  local ns entry name nss desc
+  ns=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+  ns=${ns:-default}
+  for entry in "${_kingdom_help_entries[@]}"; do
+    IFS='|' read -r name nss desc <<<"$entry"
+    case " $nss " in
+      *" $ns "*) printf '  %-10s %s\n' "$name" "$desc" ;;
+    esac
+  done
+}
+
+_kingdom_describe help "default village" "show the commands available here"
