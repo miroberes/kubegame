@@ -2,6 +2,8 @@ Welcome to the Kubernetes Kingdom Adventure!
 
 You stand before a tall iron gate set in a stone wall. Beyond it lies the kingdom, and there is no other way in. The gate stays shut until you find the way to open it.
 
+You are in the space named default.
+
 Plot: A mysterious curse has befallen the kingdom. Only the brave who master Kubernetes commands can unlock its secrets and lift the curse.
 
 Maybe you should -inspect- the gate to learn how it can be opened.
