@@ -96,3 +96,4 @@ help() {
 }
 
 _kingdom_describe help "default village" "show the commands available here"
+_kingdom_describe exit "default village" "leave the game"
