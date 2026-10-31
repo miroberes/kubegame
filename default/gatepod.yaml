@@ -10,8 +10,7 @@ spec:
     - /bin/sh
     - -c
     - |-
-      echo 'To open you need to -whisper- the magic key phrase.
-      It is, pssst... under the doormat.' > /dev/stderr; sleep infinity
+      echo 'You approached the gate, stumbling over a doormat. The gate has gold letters k8s written on it. There is no doorknob.' > /dev/stderr; sleep infinity
     image: busybox
     imagePullPolicy: IfNotPresent
     name: cluelogger
@@ -41,10 +40,10 @@ spec:
       SECRET_PHRASE=$(cat /doormat/magic-key-phrase)
       echo $1
       if [ "$1" = "$SECRET_PHRASE" ]; then
-        /tools/kubectl patch configmap kingdom-state -n default --type merge -p '{"data":{"gate":"unlocked"}}' >/dev/null || { echo "The gate does not open. Try again later."; exit 1; }
-        echo "Correct magic key phrase! The gate is unlocked. Use the command: open gate"
+        echo "Correct magic key phrase! The gate opens."
       else
         echo "Incorrect magic key phrase. Try again."
+        exit 1
       fi
       SCRIPT
       chmod +x /scripts/check_phrase.sh

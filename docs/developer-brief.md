@@ -9,7 +9,7 @@
 | 1. Start | Reads the welcome page | `curl startgame` | Shows plot and first quest | `default/instructionspod.yaml`, `startgamesvc.yaml` | Done |
 | 2. Inspect gate | Reads gate logs | `kubectl logs gate -c cluelogger` | "Whisper the magic key phrase... under the doormat" | `default/gatepod.yaml` | Done. README's `inspect` alias uses `-c main-container`, which doesn't exist here |
 | 3. Find phrase | Runs `clue` (or `kubectl exec gate -c cluelogger -- ls /doormat`), then reads `/doormat/magic-key-phrase` | "look under the doormat" from `clue`; phrase stored in the `doormat` ConfigMap | `image/manifests/06-doormat.yaml`, `07-clue.yaml` | Done |
-| 4. Whisper | Speaks the phrase | `whisper openplease` (`kubectl exec gate -c cluelogger -- sh /scripts/check_phrase.sh openplease`) | "Correct... Use the command: open gate"; sets `gate` to `unlocked` | `gatepod.yaml` | Done |
+| 4. Whisper | Speaks the phrase | `whisper openk8s` (`kubectl exec gate -c cluelogger -- sh /scripts/check_phrase.sh openk8s`) | "Correct... Use the command: open gate"; sets `gate` to `unlocked` | `gatepod.yaml` | Done |
 | 5. Open gate | Runs the command | `open gate` | Creates the `act2-player` RoleBinding in `village` and sets `act` to 2 | `commands.d/act1.rc`, `gatepod.yaml` | Done |
 ## Act II: The Village (`village` namespace)
 

@@ -4,4 +4,4 @@ metadata:
   name: doormat
   namespace: default
 data:
-  magic-key-phrase: openplease
+  magic-key-phrase: openk8s
