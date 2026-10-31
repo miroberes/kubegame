@@ -41,7 +41,8 @@ describe() {
   elif desc=$(kubectl get namespace "$1" -o jsonpath='{.metadata.annotations.description}' 2>/dev/null); then
     :
   else
-    kubectl get service "$1" >/dev/null || return 1
+    echo "There is nothing called $1 here."
+    return 1
   fi
   echo "${desc:-Nothing special about it.}"
 }
