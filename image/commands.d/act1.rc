@@ -5,6 +5,7 @@ lookaround() {
   pods=$(kubectl get pods -l listed-in="$ns" -o go-template='{{range .items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}')
   services=$(kubectl get services -l listed-in="$ns" -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
   {
+    echo "$ns"
     while read -r name phase; do
       [ -n "$name" ] || continue
       if [ "$phase" = Running ]; then echo "$name"; else echo "$name error"; fi
