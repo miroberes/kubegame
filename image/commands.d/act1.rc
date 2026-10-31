@@ -31,8 +31,14 @@ inspect() {
   if out=$(kubectl logs -c cluelogger "$1" 2>/dev/null); then
     printf '%s\n' "$out"
   elif kubectl get namespace "$1" >/dev/null 2>&1; then
-    echo "To inspect the $1 you need to enter it."
-    return 1
+    local cur
+    cur=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+    if [ "$cur" = "$1" ]; then
+      describe "$1"
+    else
+      echo "To inspect the $1 you need to enter it."
+      return 1
+    fi
   else
     echo "There is nothing called $1 here."
     return 1
