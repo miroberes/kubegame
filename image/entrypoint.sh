@@ -53,4 +53,33 @@ done
 
 kubectl --kubeconfig "$ADMIN_KUBECONFIG" apply -R -f /game/manifests
 
+# Step 3: give the player a restricted kubeconfig. The admin kubeconfig stays root-only.
+PLAYER_USER=player
+PLAYER_HOME=/home/$PLAYER_USER
+PLAYER_KUBECONFIG=$PLAYER_HOME/.kube/config
+
+chmod 0600 "$ADMIN_KUBECONFIG"
+mkdir -p /home
+if ! id "$PLAYER_USER" >/dev/null 2>&1; then
+  adduser -D -h "$PLAYER_HOME" -s /bin/sh "$PLAYER_USER"
+fi
+mkdir -p "$(dirname "$PLAYER_KUBECONFIG")"
+
+CA_FILE=$(mktemp)
+kubectl --kubeconfig "$ADMIN_KUBECONFIG" config view --raw \
+  -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' | base64 -d >"$CA_FILE"
+TOKEN=$(kubectl --kubeconfig "$ADMIN_KUBECONFIG" create token player -n default --duration=12h)
+
+rm -f "$PLAYER_KUBECONFIG"
+kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-cluster kingdom \
+  --server=https://127.0.0.1:6443 --certificate-authority="$CA_FILE" --embed-certs=true
+kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-credentials player --token="$TOKEN"
+kubectl config --kubeconfig="$PLAYER_KUBECONFIG" set-context kingdom \
+  --cluster=kingdom --user=player --namespace=default
+kubectl config --kubeconfig="$PLAYER_KUBECONFIG" use-context kingdom >/dev/null
+rm -f "$CA_FILE"
+
+chown -R "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.kube"
+chmod 0600 "$PLAYER_KUBECONFIG"
+
 echo "k3s is ready."
