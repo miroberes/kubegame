@@ -38,11 +38,14 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 | 9. Call Tooth Fairy | Dials port 8082 | `wget -O - telephone:8082` | Voicemail: teeth, gifts, "tooth's special story" | `toothfairymessagecm.yaml` |
 | 10. Booth clue | Reads booth logs | `kubectl logs telephone-booth` | Recent calls: 8082, 8081, 7777 | `telephone-boothpod.yaml` |
 
+Cross-namespace note: the `player` pod stays in `village`. See "Acting across namespaces" in section 4 for how calls work once the player has entered the wizard's house.
+
 ### Act III: Roles (not started)
 
 - After unlocking a namespace, a spell updates the player's role.
 - Players switch context to another user to gain access.
 - Players learn to create CSRs for users.
+- Players contrast identity types: they start as a ServiceAccount (a real API object) and later learn that a certificate user such as `king` is only a name in a certificate.
 
 Planned shape: Acts I and II hand the player roles passively. Act III flips this. The player runs `kubectl auth can-i`, inspects bindings, and creates a CSR and a binding themselves.
 
@@ -67,9 +70,11 @@ Planned shape: Acts I and II hand the player roles passively. Act III flips this
 alias lookaround='kubectl get pods,services'
 alias inspect='kubectl logs'
 alias enter='kubectl config set-context --current --namespace'
-alias whisper='kubectl exec gate -- sh /scripts/check_phrase.sh'
-alias call='kubectl exec player -- wget -O -'
+alias whisper='kubectl exec -n default gate -- sh /scripts/check_phrase.sh'
+alias call='kubectl exec -n village player -- wget -O -'
 ```
+
+The `-n` flags matter: `kubectl exec` looks in the current namespace, so without them `whisper` and `call` would fail with NotFound as soon as the player has used `enter` to leave the pod's namespace (see "Acting across namespaces" below).
 
 Extra words the player types land at the end of the expanded command:
 
@@ -95,7 +100,35 @@ Places to update:
 - `enter nowhere` succeeds silently and fails on the next command (`set-context` does not check that the namespace exists).
 - `call` needs the full target (`telephone:8081`), with no port shortcut.
 - Aliases only expand in interactive shells, which is fine for a player at a prompt.
-- `call` hard-codes the pod name `player` (see open issues).
+- `call` hard-codes the pod name `player` and its namespace `village` (see open issues and "Acting across namespaces").
+
+### Acting across namespaces (two routes)
+
+A pod's namespace is fixed when it is created, so the `player` pod does not move. What `enter` changes is the context's default namespace. Acting across namespaces is normal Kubernetes: any pod can reach any Service in any namespace by a qualified name (`service.namespace`), and short names resolve only within the caller's own namespace. What actually limits reach is RBAC (for kubectl access) and NetworkPolicy (for pod traffic).
+
+The player's shell is not inside the cluster, so the `player` pod exists only as a launch point for in-cluster calls. Two common real-world practices exist, and each teaches a different lesson. The game teaches both:
+
+| | Route A: fixed pod, `exec` | Route B: throwaway pod, `kubectl run` |
+|---|---|---|
+| Commands | `kubectl exec -n village player -- wget -O - telephone.village:8081` | `kubectl run tmp --rm -it --image=<pinned> --image-pull-policy=IfNotPresent -n <ns> -- sh` |
+| Core lesson | Fully qualified names; namespaces don't block reach | Creating a pod where you need it, where short names resolve naturally, and cleaning up after |
+| Side lessons | `exec`, `-n` | Image choice, `--rm`, needing `create` rights on pods in that namespace |
+| Where it fits | Start of Act II (village) | After the player has earned rights in a new namespace |
+
+Suggested order in Act II:
+
+1. **Village:** the standing `player` pod and `exec`. Short names work because the pod is in `village`.
+2. **Wizard's house:** the player has no pod there and has two valid routes: call from the village pod with a qualified name, or create a throwaway pod in the house. A hint from the phone booth or the wizard can point at either.
+3. **Later (optional):** an obstacle that favors one route, for example a NetworkPolicy that only accepts traffic from inside the house (making Route B the working one). Leave both routes open unless a lesson needs steering. This should be a deliberate choice.
+
+Validation looks at cluster state, not at how the player got there, so both routes complete the puzzle.
+
+Notes:
+
+- **Spells:** `call` stays an alias for Route A. Route B is taught as the raw `kubectl run` command, since Act II is where raw commands start to appear.
+- **Story:** a line such as "your voice travels back through the village telephone" can explain why a call from the wizard's house originates in the village.
+- **NetworkPolicy:** a policy in the wizard's house treats traffic from the `village` pod as external. Make that deliberate, not accidental.
+- **RBAC and images for Route B:** see section 5 and the open issues.
 
 ### Optional: story layer via a shared helper
 
@@ -126,8 +159,8 @@ story() {
 alias lookaround='story kubectl get pods,services'
 alias inspect='story kubectl logs'
 alias enter='story kubectl config set-context --current --namespace'
-alias whisper='story kubectl exec gate -- sh /scripts/check_phrase.sh'
-alias call='story kubectl exec player -- wget -O -'
+alias whisper='story kubectl exec -n default gate -- sh /scripts/check_phrase.sh'
+alias call='story kubectl exec -n village player -- wget -O -'
 ```
 
 Notes:
@@ -203,23 +236,56 @@ The brief names `use` but never defines it. Its role is undecided.
 
 The village exists from the start. Access is controlled by RBAC.
 
-- **Restricted player identity.** The player must not hold cluster-admin credentials. The environment hands them a ServiceAccount or user with only Act I rights (for example `logs` and `exec` on the gate pod). Without this, no `Forbidden` error ever fires.
-- **Unlocking = a RoleBinding.** Solving the gate puzzle makes `check_phrase.sh` (or the gate pod) create a RoleBinding granting the player rights in `village`. The unlock is a real object, discoverable with `kubectl get rolebindings -n village`.
+- **Restricted player identity (decided): a ServiceAccount named `player-sa` in `default`.** The player must not hold cluster-admin credentials. They get a ServiceAccount with only Act I rights. Without this, no `Forbidden` error ever fires. The name avoids a clash with the `player` pod and follows the common `-sa` convention. Kubernetes names are lowercase letters, digits, and hyphens, and must not start with `system:`.
+- **Identity, Role, binding.** A ServiceAccount is only an identity. A new one has almost no rights (just basic discovery permissions). Privilege comes from a RoleBinding joining it to a Role. Every unlock in the game is: an identity, a Role describing what is allowed, and a binding joining them. A player who creates a new ServiceAccount gets nothing until a binding exists.
+- **Unlocking = a RoleBinding.** Solving the gate puzzle makes `check_phrase.sh` (or the gate pod) create a RoleBinding granting the player rights in `village`. The unlock is a real object, discoverable with `kubectl get rolebindings -n village`. The subject is the `default` namespace's ServiceAccount, named explicitly (cross-namespace subjects are normal):
+
+  ```yaml
+  subjects:
+    - kind: ServiceAccount
+      name: player-sa
+      namespace: default
+  ```
 - **Privilege escalation rules.** The gate pod's ServiceAccount needs permission to create RoleBindings in `village`. Kubernetes blocks escalation, so it also needs the `bind` verb on the specific Role it hands out.
 - **Who creates the RoleBinding.** Two options. In-cluster: `check_phrase.sh` creates it, which keeps all puzzle logic inside Kubernetes (more native) but requires the gate's ServiceAccount to have `create` on rolebindings and `bind` on the Role. Engine-side: the container's startup/engine script, holding the admin credentials, creates it after observing the solved state (no `bind` setup needed, but puzzle logic lives outside the world).
 - **Minimum first grant.** Step 6 needs `pods/exec` in `village` (the player pod lives there). The wizard's house gets its own binding when the telephone puzzle is solved.
+- **Throwaway-pod route (section 4).** Creating a pod in a namespace is a permission the player earns through that namespace's RoleBinding, so the unlock has a visible effect. `kubectl run -it --rm` needs more than `create` on pods: it also has to watch the pod, attach to it, and delete it afterward. The exact verbs and subresources must be tested. A `Forbidden` on creation is a good trigger for a story line.
 - **Namespace lookups.** If a spell checks that a namespace exists, the player's role needs `get` on namespaces.
 - **What RBAC does not control.** In-cluster traffic such as the `wget` calls between pods is unaffected. Act II's "locks" are RBAC (kubectl access), while its "puzzles" are networking. Keep these separate when designing content.
-- **Side effect.** Restricting `get pod gate -o yaml` closes the spoiler leak where `openplease` is readable in plain text in the manifest. A player can still `cat` the script from inside the pod, which is a legitimate advanced move.
+- **Spoiler leak (correction).** An earlier version of this document claimed that restricting `get pod gate -o yaml` closes the leak. That is probably wrong: `kubectl logs` and `kubectl exec` first fetch the pod, so the player needs `get` on pods, and with it `kubectl get pod gate -o yaml` works too (restricting by `resourceNames` limits which pods, not what is shown). If the phrase sits in the pod spec (command or args), it is readable. Mitigation to test: keep the phrase out of the spec, for example in a Secret the init script reads (the spec then shows only a reference, and the player has no rights on secrets), or inside the image. A player can still read the script from inside the pod, which is a legitimate advanced move. Verify the `get` requirement on the pinned kubectl version.
+
+### Provisioning `player-sa` (startup script)
+
+1. Create the ServiceAccount in `default` (where Act I lives).
+2. Create a token and write a kubeconfig that uses it.
+3. Grant Act I rights with a Role and RoleBinding.
+
+**Token lifetime.** `kubectl create token` issues short-lived tokens by default, and a play session can outlast one. Options: request a longer duration, or use a long-lived token stored in a Secret of type `kubernetes.io/service-account-token` (considered legacy, but simpler for a local game). Check what the pinned k3s version allows.
+
+### Pods and ServiceAccounts
+
+- A pod acts as the ServiceAccount named in its `serviceAccountName`, or the namespace's `default` ServiceAccount if none is named. That `default` identity has no rights. Keep it separate from `player-sa`. Do not run the `player` pod under `player-sa` unless that is a deliberate lesson.
+- **A pod can only use a ServiceAccount from its own namespace.** Setting `serviceAccountName: player-sa` on a pod in `village` fails, because `player-sa` lives in `default`. This is why the `village` RoleBinding names its subject's namespace explicitly. It is also a lesson: identities belong to namespaces.
+- `serviceAccountName` cannot be changed on a running pod, so fixing a pod's identity means deleting and recreating it.
+- Anyone who can create pods in a namespace can run them as any ServiceAccount in that namespace, which is a real privilege-escalation path and a possible Act III lesson.
+
+**Example lesson (from the discussion): the herald who can't read the decree.** A herald pod in `village` logs a `Forbidden` error naming `system:serviceaccount:village:default`. The player confirms with `kubectl auth can-i get configmaps --as=system:serviceaccount:village:default -n village`, then creates a ServiceAccount, a Role for the decree ConfigMap, and a RoleBinding, and recreates the herald with `serviceAccountName` set.
+
+### Self-inspection tools for the player
+
+- `kubectl get rolebindings -n village`: who was granted access.
+- `kubectl describe rolebinding <name>`: the exact Role and subject.
+- `kubectl auth can-i --list`: what the current identity may do.
+- `kubectl auth whoami` exists in newer kubectl versions. Verify against the pinned version.
 
 ### Error layering example
 
 ```
-Error from server (Forbidden): pods is forbidden: User "player" cannot list resource "pods" in namespace "village"
+Error from server (Forbidden): pods is forbidden: User "system:serviceaccount:default:player-sa" cannot list resource "pods" in API group "" in the namespace "village"
 The villagers turn their backs on you. You have no standing here yet.
 ```
 
-The native line names the user, verb, resource, and namespace, which feeds `kubectl auth can-i list pods -n village` later. The word "yet" hints that something the player does will change it.
+The native line names the user (a ServiceAccount's full system name, which includes its namespace), the verb, the resource, the API group, and the namespace. That feeds `kubectl auth can-i list pods -n village` later. The exact wording should be confirmed against the pinned Kubernetes version. The story helper only reads the namespace after "in the namespace", so it works unchanged. The word "yet" hints that something the player does will change it.
 
 ---
 
@@ -254,7 +320,7 @@ Container
 Startup sequence (entrypoint script):
 
 1. Start k3s and wait until it is ready.
-2. Create the restricted player identity (ServiceAccount) and write its kubeconfig inside the container.
+2. Create the `player-sa` ServiceAccount, its token, and a kubeconfig that uses it, written inside the container (see "Provisioning `player-sa`" in section 5).
 3. Apply the manifests (namespaces including `village`, pods, services, Act I RBAC, the `kingdom-state` ConfigMap).
 4. Print the welcome text and open the player's shell as the non-root player user.
 
@@ -397,9 +463,9 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 
 1. **Port 8082 conflict:** `wizardsphone.yaml` says "Wrong number" while the operator pod serves the Tooth Fairy.
 2. **Duplicate `telephone` Services:** `wizardsphone.yaml` and `telephonesvc.yaml` both define `telephone` in `village`.
-3. **Player pod name:** `player.yaml` names it `playerpod`, the README uses `player`.
+3. **Player pod name:** `player.yaml` names it `playerpod`, the README uses `player`. Decision: the pod is `player` (matches the README and the other pods' naming), the RBAC identity is `player-sa`. `player.yaml` and its pod name need updating.
 4. **Undefined spells:** `use` and the final definitions of the others (see section 4). `sns` is replaced by `enter`.
-5. **Spoiler leak:** the phrase is plain text in `gatepod.yaml` (mitigated by RBAC, see section 5).
+5. **Spoiler leak:** the phrase is plain text in `gatepod.yaml`. RBAC probably does not fix this (see the correction in section 5). Move the phrase out of the pod spec.
 6. **Undefined story:** the curse, the 7777 line, the wizard's house, and the Tooth Fairy's reward have no content.
 
 ### README
@@ -417,6 +483,14 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 13. **Narrowing `--privileged`** is untested (section 6 test plan).
 14. **kubectl wrapper** needs testing for interactive modes, stream separation, and exit codes.
 15. **Base image and k3s packaging** for the single container are not decided or verified.
+16. **Alias namespaces:** `whisper` and `call` now name their namespace (`-n default`, `-n village`). The pod name and namespace still need to be settled (issue 3).
+17. **RBAC verbs for `kubectl run --rm -it`** are untested (section 5).
+18. **Throwaway pod image:** needs a pinned tag preloaded into the cluster's image store, with `--image-pull-policy=IfNotPresent`, since an unpinned `latest` tag defaults to always pulling and fails offline. How k3s imports preloaded images is unverified.
+19. **Stray pods:** `--rm` cleans up after a normal exit, but a player who disconnects leaves pods behind. Consider cleanup by the engine or a TTL.
+20. **`player-sa` token lifetime** and k3s behavior for long-lived tokens (section 5).
+21. **`player-sa` RBAC manifests** (Role, RoleBinding, Act I rights) do not exist yet.
+22. **`get` on pods is required** for `logs` and `exec`, which affects the spoiler mitigation (section 5). Verify.
+23. **Exact `Forbidden` wording** for ServiceAccounts should be confirmed against the pinned version, and the story helper's pattern re-tested.
 
 ---
 
@@ -427,6 +501,10 @@ Publish the image to **GitHub Container Registry (GHCR)** as the primary registr
 - Should the player see a `Forbidden` error early on purpose (a quest line sending them to `village` too soon), or should the story steer them there only after the gate is solved?
 - Should story lines be scenario-specific, error-type-based, or a mix (error-type default with scenario overrides)?
 - What does `use` do?
+- Add the herald lesson (pod identity) to the debugging ladder in `curse-design.md`?
+- Long-lived token for `player-sa`, or a long duration on a created token?
+- Should a later obstacle steer the player toward one route (fixed pod vs. throwaway pod), or leave both open?
+- Is one standing pod per namespace ever needed, or are the two routes enough?
 - Which container runtimes are supported (Docker only, or also Podman/Colima)?
 - Who creates the village RoleBinding: `check_phrase.sh` in the cluster, or the startup/engine script (section 5)?
 - Should the engine also validate puzzle state (as in the exam-practice spec), or does the in-cluster logic suffice?
