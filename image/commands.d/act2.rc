@@ -1,1 +1,5 @@
-alias call='kubectl exec player -- wget -O -'
+alias call='kubectl exec player-pod -- wget -O -'
+
+enter() {
+  kubectl run player-pod --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity"
+}
