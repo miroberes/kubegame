@@ -14,7 +14,7 @@ _kingdom_load_commands() {
   done
 }
 
-PROMPT_COMMAND=_kingdom_load_commands
+PROMPT_COMMAND='printf "\n"; _kingdom_load_commands'
 
 # Rewrites a typed line before it runs: maps synonyms to command names and drops filler words.
 # Lines that don't start with a known command are returned unchanged, so raw kubectl still works.
