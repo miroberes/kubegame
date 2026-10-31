@@ -31,7 +31,7 @@ A text-adventure game that teaches people to operate a Kubernetes cluster. The p
 
 | Step | Player action | Solution | Result | Source |
 |---|---|---|---|---|
-| 5. Enter village | Runs the command | `switch village` | Player arrives in the village | none yet |
+| 5. Enter village | Runs the command | `enter village` | Player arrives in the village | none yet |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` |
 | 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: enter wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` |
 | 8. Enter wizard's house | Runs the command | `enter wizardshouse` | Door opens | none yet, not designed yet, nothing follows |
@@ -91,7 +91,7 @@ Places to update:
 
 - `gatepod.yaml`: success message becomes "Use the command: enter village".
 - Telephone operator output (step 7): becomes "Use the command: enter wizardshouse".
-- Step 5 in the brief: solution becomes `switch village`. Step 8 stays `enter wizardshouse` until its design exists.
+- Step 5 in the brief: solution becomes `enter village`. Step 8 stays `enter wizardshouse` until its design exists.
 
 ### Known limits of plain aliases
 

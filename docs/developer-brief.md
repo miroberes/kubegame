@@ -15,7 +15,7 @@
 
 | Step | Player action | Solution | Result | Source | Status |
 |---|---|---|---|---|---|
-| 5. Enter village | Runs the command | `switch village` (`kubectl config set-context --current --namespace village`) | Unlocks village | None | Undefined. No `village` namespace manifest exists |
+| 5. Enter village | Runs the command | `enter village` (checks the namespace, creates `player-pod`, switches to `village`) | Unlocks village | None | Undefined. No `village` namespace manifest exists |
 | 6. Read poster | Calls the chimney sweep | `kubectl exec player -it -- wget -O - chimneysweep` | "Call wizard on his phone..." | `chimneysweep.yaml`, `poster-on-the-chimney.yaml` | Done. Poster logs hint at the chimney |
 | 7. Call wizard | Dials the wizard | `wget -O - telephone:8081` | "Use the command: enter wizardshouse" | `telephone-operatorpod.yaml`, `telephonesvc.yaml` | Partial. See conflicts below |
 | 8. Enter wizard's house | Runs the command | `enter wizardshouse` | Door opens | None | Undefined. Entering the house is not designed yet; nothing follows this step |

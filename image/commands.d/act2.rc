@@ -10,4 +10,4 @@ enter() {
   kubectl run player-pod --namespace="$1" --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity" || return 1
   switch "$1"
 }
-_kingdom_describe enter "village" "create your player-pod in a namespace, e.g. enter village"
+_kingdom_describe enter "village" "enter a namespace: creates your player-pod there and switches to it, e.g. enter village"
