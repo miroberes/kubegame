@@ -1,7 +1,7 @@
 lookaround() {
   local pods services name phase svc ips
-  pods=$(kubectl get pods -l kingdom/visible=true -o go-template='{{range .items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}')
-  services=$(kubectl get services -l kingdom/visible=true -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+  pods=$(kubectl get pods -l listed-in=default -o go-template='{{range .items}}{{.metadata.name}} {{.status.phase}}{{"\n"}}{{end}}')
+  services=$(kubectl get services -l listed-in=default -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
   {
     while read -r name phase; do
       [ -n "$name" ] || continue

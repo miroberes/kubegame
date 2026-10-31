@@ -14,7 +14,7 @@ metadata:
   namespace: default
   labels:
     run: clue
-    kingdom/visible: "true"
+    listed-in: default
 spec:
   containers:
   - name: clue
@@ -35,7 +35,7 @@ metadata:
   name: clue
   namespace: default
   labels:
-    kingdom/visible: "true"
+    listed-in: default
 spec:
   selector:
     run: clue

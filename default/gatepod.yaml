@@ -4,7 +4,7 @@ metadata:
   name: gate
   namespace: default
   labels:
-    kingdom/visible: "true"
+    listed-in: default
 spec:
   serviceAccountName: gate
   containers:
