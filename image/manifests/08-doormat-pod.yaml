@@ -5,6 +5,7 @@ metadata:
   namespace: default
   labels:
     run: doormat
+    kingdom/visible: "true"
 spec:
   containers:
   - name: cluelogger

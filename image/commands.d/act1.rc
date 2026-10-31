@@ -1,4 +1,4 @@
-alias lookaround='kubectl get pods,services'
+alias lookaround='kubectl get pods,services -l kingdom/visible=true'
 alias inspect='kubectl logs -c cluelogger'
 switch() {
   kubectl get namespace "$1" >/dev/null || return 1
