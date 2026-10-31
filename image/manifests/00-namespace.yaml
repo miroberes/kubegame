@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: village
   annotations:
-    description: "Beyond the gate lies a small village. A house with a chimney stands at its edge, and a poster hangs too high on it to read. Nearby stands an old telephone booth."
+    description: "You are in a small village. A house with a chimney stands at its edge. Nearby stands an old telephone booth."
