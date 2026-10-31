@@ -30,6 +30,9 @@ inspect() {
   local out
   if out=$(kubectl logs -c cluelogger "$1" 2>/dev/null); then
     printf '%s\n' "$out"
+  elif kubectl get namespace "$1" >/dev/null 2>&1; then
+    echo "To inspect the $1 you need to enter it."
+    return 1
   else
     echo "There is nothing called $1 here."
     return 1

@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: village
+  labels:
+    listed-in: default
   annotations:
     description: "You are in a small village. A house with a chimney stands at its edge. Nearby stands an old telephone booth."
     outside-description: "A small village lies beyond the gate. A house with a chimney stands at its edge, and something on its roof has caught your eye. Enter the village to find out what it is."
