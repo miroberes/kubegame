@@ -1,4 +1,4 @@
-Project site: https://miroberes.github.io/
+CKAD Exam Tips: https://miroberes.github.io/
 
 --- provide initial scene, like in Goblins, setting the objective
 
