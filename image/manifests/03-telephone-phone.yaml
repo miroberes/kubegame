@@ -21,8 +21,7 @@ metadata:
   namespace: telephone-booth
   labels:
     app: telephone-phone
-    listed-in: telephone-booth
-spec:
+  name: telephone-phone
   containers:
   - name: phone
     image: nginx
