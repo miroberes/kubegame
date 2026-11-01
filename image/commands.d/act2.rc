@@ -1,5 +1,13 @@
 alias call='kubectl exec player-pod -- wget -q -O -'
+dial() {
+  case "$1" in
+    telephone|telephone:*) kubectl exec player-pod -- wget -q -O - "$1" ;;
+    '') echo "usage: dial telephone:<port>" >&2; return 1 ;;
+    *) echo "There is nothing called $1 here." >&2; return 1 ;;
+  esac
+}
 _kingdom_describe call "village" "call a service from your player-pod, e.g. call chimneysweep"
+_kingdom_describe dial "telephone-booth" "dial a number on the phone, e.g. dial telephone:8081"
 
 enter() {
   if [ -z "$1" ]; then
