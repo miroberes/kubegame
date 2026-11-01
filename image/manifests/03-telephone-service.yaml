@@ -14,6 +14,10 @@ spec:
     port: 8081
     protocol: TCP
     targetPort: 8081
+  - name: booth
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
   selector:
     app: telephone-phone
   type: ClusterIP

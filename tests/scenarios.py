@@ -21,6 +21,10 @@ SCENARIOS = [
             },
             {"run": "call chimneysweep", "expect": ["Call wizard on his phone"]},
             {"run": "hey chimneysweep", "expect": ["Nice day, eh? Looking for the wizard?"]},
+        ],
+    },
+    {
+        "name": "The telephone booth",
         "steps": [
             {"run": "enter telephone-booth", "expect": ["You entered the telephone-booth"]},
             {"run": "describe telephone-booth", "expect": ["recent calls: 8082, 8081, 7777"]},
@@ -40,6 +44,7 @@ SCENARIOS = [
         "steps": [
             {"run": "dial 8081", "expect": ["dial 8081 Name"]},
             {"run": "dial 8081 Alice", "expect": ["Thank you, Alice. I will remember your name."]},
+            {"run": "dial 8080", "expect": ["If you wait long enough"]},
         ],
     },
     {
@@ -47,6 +52,10 @@ SCENARIOS = [
         "steps": [
             {"run": "enter wizardshouse Bob", "expect": ["The wizard has not let you in yet."]},
             {"run": "enter wizardshouse Alice", "expect": ["You entered the wizardshouse"]},
+            {"run": "dial 8081", "expect": ["dial 8081 Name"]},
+            {"run": "dial 8080", "expect": ["If you wait long enough"]},
+            {"run": "inspect bookshelf-pod", "expect": ["The Pipeline Grimoire"]},
+            {"run": "describe bookshelf-pod", "expect": ["The Pipeline Grimoire"]},
             {"run": "describe wizardshouse", "expect": ["A chimneysweep is on the roof, sweeping the chimney."]},
         ],
     },

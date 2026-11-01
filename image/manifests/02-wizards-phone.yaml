@@ -52,6 +52,15 @@ spec:
     - mountPath: /tools
       name: tools
   containers:
+  - name: relay
+    image: nginx
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /etc/nginx/conf.d
+      name: relay-config
   - name: wizardsphone
     image: busybox
     imagePullPolicy: IfNotPresent
@@ -75,6 +84,9 @@ spec:
     - mountPath: /tools
       name: tools
   volumes:
+  - name: relay-config
+    configMap:
+      name: wizards-phone-relay
   - name: tools
     emptyDir: {}
   - name: message
@@ -98,6 +110,26 @@ spec:
     port: 8081
     protocol: TCP
     targetPort: 8081
+  - name: relay
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
   selector:
     run: wizards-phone
   type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wizards-phone-relay
+  namespace: wizardshouse
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_name localhost;
+
+      location / {
+        proxy_pass http://booth-telephone.telephone-booth:8080;
+      }
+    }

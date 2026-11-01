@@ -1,21 +1,25 @@
 alias call='kubectl exec player-pod -- wget -q -O -'
 dial() {
-  case "$1" in
-    [0-9]*) set -- "booth-telephone:$1" "${@:2}" ;;
+  local ns phone target
+  ns=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+  case "$ns" in
+    telephone-booth) phone=booth-telephone ;;
+    wizardshouse) phone=wizards-phone ;;
+    *) echo "There is no phone here." >&2; return 1 ;;
   esac
   case "$1" in
-    booth-telephone|booth-telephone:*) ;;
-    '') echo "usage: dial booth-telephone:<port> [name]" >&2; return 1 ;;
+    '') echo "usage: dial <number> [name]" >&2; return 1 ;;
+    [0-9]*) target="$phone:$1" ;;
     *) echo "There is nothing called $1 here." >&2; return 1 ;;
   esac
   if [ -n "$2" ]; then
-    kubectl exec player-pod -- wget -q -O - --post-data="$2" "http://$1/cgi-bin/message"
+    kubectl exec player-pod -- wget -q -O - --post-data="$2" "http://$target/cgi-bin/message"
   else
-    kubectl exec player-pod -- wget -q -O - "$1"
+    kubectl exec player-pod -- wget -q -O - "$target"
   fi
 }
 _kingdom_describe call "village" "call a service from your player-pod, e.g. call chimneysweep"
-_kingdom_describe dial "telephone-booth" "dial a number on the phone, e.g. dial XXXX"
+_kingdom_describe dial "telephone-booth wizardshouse" "dial a number on the phone, e.g. dial XXXX"
 
 hey() {
   case "$1" in
@@ -26,6 +30,14 @@ hey() {
 }
 hi() { hey "$@"; }
 _kingdom_describe hey "village" "say hello to someone, e.g. hey chimneysweep"
+
+_kingdom_drop_pod() {
+  kubectl delete pod player-pod --namespace="$1" --now --wait=false --ignore-not-found >/dev/null 2>&1
+  for _ in $(seq 15); do
+    kubectl get pod player-pod --namespace="$1" >/dev/null 2>&1 || return 0
+    sleep 1
+  done
+}
 
 enter() {
   if [ -z "$1" ]; then
@@ -47,8 +59,8 @@ enter() {
   fi
   local cur
   cur=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
-  if [ -n "$cur" ]; then kubectl delete pod player-pod --namespace="$cur" --now --ignore-not-found >/dev/null 2>&1; fi
-  kubectl delete pod player-pod --namespace="$1" --now --ignore-not-found >/dev/null 2>&1
+  if [ -n "$cur" ]; then _kingdom_drop_pod "$cur"; fi
+  _kingdom_drop_pod "$1"
   kubectl run player-pod --namespace="$1" --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity" >/dev/null || return 1
   local i=0 spin_c
   for _ in $(seq 60); do

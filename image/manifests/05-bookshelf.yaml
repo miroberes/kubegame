@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bookshelf-pod
+  namespace: wizardshouse
+  labels:
+    listed-in: wizardshouse
+  annotations:
+    description: "A tall shelf bows under the weight of the wizard’s library, The Pipeline Grimoire. Containers for the Curious. A Hundred Rollouts and One Rollback. Infrastructure as Incantation. Why Is It Pending? A Wizard’s Troubleshooting Almanac."
+spec:
+  containers:
+  - name: cluelogger
+    image: busybox
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "A tall shelf bows under the weight of the wizard’s library, The Pipeline Grimoire. Containers for the Curious. A Hundred Rollouts and One Rollback. Infrastructure as Incantation. Why Is It Pending? A Wizard’s Troubleshooting Almanac." >> /dev/stderr;
+        sleep infinity

@@ -121,9 +121,9 @@ def check_manifests():
 SHELL_CASES = [
     ("dial 8081", "kubectl exec player-pod -- wget -q -O - booth-telephone:8081", 0),
     ("dial 8081 Alice", "--post-data=Alice http://booth-telephone:8081/cgi-bin/message", 0),
-    ("dial booth-telephone:8081", "kubectl exec player-pod -- wget -q -O - booth-telephone:8081", 0),
+    ("dial 8081", "kubectl exec player-pod -- wget -q -O - booth-telephone:8081", 0),
     ("dial chimneysweep", "There is nothing called chimneysweep here.", 1),
-    ("dial", "usage: dial booth-telephone:<port> [name]", 1),
+    ("dial", "usage: dial <number> [name]", 1),
     ("enter nosuch-space", "There is nothing called nosuch-space here.", 1),
     ("hey chimneysweep", "Nice day, eh? Looking for the wizard? You need to call him on his phone first.", 0),
     ("hey nobody", "There is nothing called nobody here.", 1),
@@ -149,7 +149,7 @@ def check_shell():
     with tempfile.TemporaryDirectory() as stub_dir:
         stub = os.path.join(stub_dir, "kubectl")
         with open(stub, "w") as f:
-            f.write('#!/bin/sh\necho "kubectl $*"\n')
+            f.write('#!/bin/sh\ncase "$*" in *"config view"*) echo telephone-booth ;; *) echo "kubectl $*" ;; esac\n')
         os.chmod(stub, 0o755)
         for snippet, wanted, rc in SHELL_CASES:
             code, out = shell_run(stub_dir, snippet)

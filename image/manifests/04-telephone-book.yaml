@@ -14,5 +14,5 @@ spec:
       - /bin/sh
       - -c
       - |
-        echo "Telephone book of the kingdom. Use -dial- to call. Wizard: dial 8081. Tooth Fairy: dial 8082." >> /dev/stderr;
+        echo "Telephone book of the kingdom. Use -dial- to call. Wizard: dial 8081. Tooth Fairy: dial 8082. Booth: dial 8080." >> /dev/stderr;
         sleep infinity

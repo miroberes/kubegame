@@ -52,8 +52,16 @@ _kingdom_normalize() {
 
 if [[ $- == *i* ]]; then
   _kingdom_rewrite_line() {
+    if [ "$READLINE_LINE" != exit ]; then _kingdom_exit_armed=; fi
     READLINE_LINE=$(_kingdom_normalize "$READLINE_LINE")
     READLINE_POINT=${#READLINE_LINE}
+  }
+  exit() {
+    if [ -n "$_kingdom_exit_armed" ]; then
+      builtin exit
+    fi
+    _kingdom_exit_armed=1
+    echo "Leaving the kingdom now will end your game. Type exit again to leave."
   }
   bind -x '"\C-x\C-n": _kingdom_rewrite_line'
   # Enter first rewrites the line, then accepts it.

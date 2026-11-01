@@ -13,6 +13,14 @@ data:
         proxy_pass http://wizards-phone.wizardshouse:8081;
       }
     }
+    server {
+      listen 8080;
+      server_name localhost;
+
+      location / {
+        return 200 "Hello, this is the telephone booth. If you wait long enough, maybe somebody answers the call, but i would not bet on it...\n";
+      }
+    }
 ---
 apiVersion: v1
 kind: Pod
@@ -28,6 +36,8 @@ spec:
     imagePullPolicy: IfNotPresent
     ports:
     - containerPort: 8081
+      protocol: TCP
+    - containerPort: 8080
       protocol: TCP
     volumeMounts:
     - mountPath: /etc/nginx/conf.d

@@ -59,7 +59,7 @@ wait_pid=$!
 spin_i=0
 while kill -0 "$wait_pid" 2>/dev/null; do
   case $((spin_i % 4)) in 0) spin_c='|' ;; 1) spin_c='/' ;; 2) spin_c='-' ;; *) spin_c='\' ;; esac
-  printf '\rLoading the Kubernetes kingdom %s ' "$spin_c" >&2
+  printf '\rLoading the Kubernetes kingdom %s %s ' "$(cat /game/VERSION)" "$spin_c" >&2
   spin_i=$((spin_i + 1))
   sleep 0.2
 done
@@ -101,7 +101,6 @@ chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.profile"
 # Step 4: welcome text.
 printf '\n'
 cat /game/welcome.txt
-printf 'Version %s\n' "$(cat /game/VERSION)"
 
 # Step 5: replace this process with the player's login shell, running as the unprivileged user.
 exec su -l "$PLAYER_USER" -c "exec bash -l"
