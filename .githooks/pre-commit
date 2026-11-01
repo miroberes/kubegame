@@ -1,0 +1,12 @@
+#!/bin/sh
+# Bumps the patch number in image/VERSION and stages it, so every commit carries a new version.
+set -e
+root=$(git rev-parse --show-toplevel)
+file="$root/image/VERSION"
+current=$(cat "$file")
+major=${current%%.*}
+rest=${current#*.}
+minor=${rest%%.*}
+patch=${rest#*.}
+printf '%s.%s.%s\n' "$major" "$minor" "$((patch + 1))" > "$file"
+git add "$file"
