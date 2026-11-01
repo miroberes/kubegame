@@ -47,7 +47,8 @@ SCENARIOS = [
     {
         "name": "The wizard's house",
         "steps": [
-            {"run": "enter wizardshouse", "expect": ["The wizard has not let you in yet."]},
+            {"run": "enter wizardshouse Bob", "expect": ["The wizard has not let you in yet."]},
+            {"run": "enter wizardshouse Alice", "expect": ["You entered the wizardshouse"]},
             {"run": "describe wizardshouse", "expect": ["A house with a chimney stands in the village"]},
         ],
     },

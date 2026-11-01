@@ -22,6 +22,7 @@ data:
     echo
     if [ "$REQUEST_METHOD" = POST ]; then
       head -c "${CONTENT_LENGTH:-0}" > /data/name
+      /tools/kubectl create rolebinding wizard-visitor --role=wizardshouse-visitor --serviceaccount=default:player -n wizardshouse >/dev/null 2>&1 || true
       echo "Thank you, $(cat /data/name). I will remember your name. Use it to enter my house."
     elif [ -s /data/name ]; then
       echo "I remember: $(cat /data/name)"
@@ -38,6 +39,18 @@ metadata:
     run: wizards-phone
     listed-in: wizardshouse
 spec:
+  serviceAccountName: wizard-phone
+  initContainers:
+  - name: copy-kubectl
+    image: rancher/k3s:v1.33.4-k3s1
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - cp -L /bin/kubectl /tools/kubectl && chmod 0755 /tools/kubectl
+    volumeMounts:
+    - mountPath: /tools
+      name: tools
   containers:
   - name: wizardsphone
     image: busybox
@@ -59,7 +72,11 @@ spec:
       name: message
     - mountPath: /data
       name: memory
+    - mountPath: /tools
+      name: tools
   volumes:
+  - name: tools
+    emptyDir: {}
   - name: message
     configMap:
       name: wizards-phone-message
