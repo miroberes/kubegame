@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: telephone-book
+  namespace: telephone-booth
+  labels:
+    run: telephone-book
+    listed-in: telephone-booth
+spec:
+  containers:
+  - image: busybox
+    name: cluelogger
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Telephone book of the kingdom. Wizard: 8081. Tooth Fairy: 8082." >> /dev/stderr;
+        sleep infinity

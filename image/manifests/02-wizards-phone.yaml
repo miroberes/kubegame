@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wizards-phone
+  namespace: wizardshouse
+  labels:
+    run: wizards-phone
+    listed-in: wizardshouse
+spec:
+  containers:
+  - name: wizardsphone
+    image: nginx
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8081
+      protocol: TCP
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo 'Hello, this is the Wizard. Leave a message with your name.' > /usr/share/nginx/html/index.html;
+        sed -i 's/listen  *80;/listen 8081;/' /etc/nginx/conf.d/default.conf;
+        nginx -g 'daemon off;'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wizards-phone
+  namespace: wizardshouse
+  labels:
+    listed-in: wizardshouse
+spec:
+  ports:
+  - name: wizardsphone
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    run: wizards-phone
+  type: ClusterIP

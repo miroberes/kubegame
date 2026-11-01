@@ -2,9 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: telephone
-  namespace: village
+  namespace: telephone-booth
   labels:
-    listed-in: village
+    listed-in: telephone-booth
 spec:
   clusterIP: None
   ports:
@@ -12,10 +12,6 @@ spec:
     port: 8081
     protocol: TCP
     targetPort: 8081
-  - name: toothfairysphone
-    port: 8082
-    protocol: TCP
-    targetPort: 8082
   selector:
-    app: telephone-operator
+    app: telephone-phone
   type: ClusterIP

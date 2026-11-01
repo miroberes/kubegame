@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telephone-phone-config
+  namespace: telephone-booth
+data:
+  default.conf: |
+    server {
+      listen 8081;
+      server_name localhost;
+
+      location / {
+        proxy_pass http://wizards-phone.wizardshouse:8081;
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: telephone-phone
+  namespace: telephone-booth
+  labels:
+    app: telephone-phone
+    listed-in: telephone-booth
+spec:
+  containers:
+  - name: phone
+    image: nginx
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8081
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /etc/nginx/conf.d
+      name: nginx-config
+  volumes:
+  - name: nginx-config
+    configMap:
+      name: telephone-phone-config

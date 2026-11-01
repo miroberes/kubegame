@@ -30,9 +30,7 @@ COPY image/commands.d/ /etc/kingdom/commands.d/
 # Game manifests. wizardsphone.yaml and wrongnumbermessagecm.yaml are left out
 # until the telephone book replaces the duplicate telephone Service.
 COPY image/manifests/ /game/manifests/
-COPY chimneysweep.yaml nginx-config-toothfairyphonecm.yaml nginx-config-wizardsphonecm.yaml \
-     poster-on-the-chimney.yaml telephone-operatorpod.yaml \
-     telephonesvc.yaml toothfairymessagecm.yaml wizardsmessagecm.yaml /game/manifests/
+COPY chimneysweep.yaml poster-on-the-chimney.yaml /game/manifests/
 COPY default/gatepod.yaml default/instructionspod.yaml default/startgamesvc.yaml /game/manifests/default/
 
 ENTRYPOINT ["/entrypoint.sh"]

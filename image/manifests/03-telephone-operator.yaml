@@ -3,9 +3,9 @@ kind: Pod
 metadata:
   labels:
     app: telephone-operator
-    listed-in: village
+    listed-in: telephone-booth
   name: telephone-operator
-  namespace: village
+  namespace: telephone-booth
 spec:
   containers:
   - image: nginx
