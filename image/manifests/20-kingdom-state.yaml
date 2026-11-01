@@ -5,3 +5,4 @@ metadata:
   namespace: kingdom-state
 data:
   act: "1"
+  book: "false"

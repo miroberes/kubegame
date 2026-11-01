@@ -67,4 +67,15 @@ SCENARIOS = [
             {"run": "call chimneysweep", "expect": ["Call wizard on his phone"]},
         ],
     },
+    {
+        "name": "The book of spells",
+        "steps": [
+            {"run": "enter wizardshouse Alice", "expect": ["You entered the wizardshouse"]},
+            {"run": "kubectl apply -f ~/k8s-spellkeeper.yaml", "expect": ["pod/k8s-spellkeeper-pod created", "configmap/book created"]},
+            {"run": "sleep 6"},
+            {"run": "enter village", "expect": ["You entered the village, look around..."]},
+            {"run": "kubectl get pod k8s-spellkeeper-pod -n village -o name", "expect": ["pod/k8s-spellkeeper-pod"]},
+            {"run": "call chimneysweep", "expect": ["Call wizard on his phone"]},
+        ],
+    },
 ]

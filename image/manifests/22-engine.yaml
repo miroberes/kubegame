@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: engine
+  namespace: kingdom-state
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: engine-watch-book
+  namespace: wizardshouse
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["book"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: engine-watch-book
+  namespace: wizardshouse
+subjects:
+- kind: ServiceAccount
+  name: engine
+  namespace: kingdom-state
+roleRef:
+  kind: Role
+  name: engine-watch-book
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: engine-set-flag
+  namespace: kingdom-state
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["kingdom-state"]
+  verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: engine-set-flag
+  namespace: kingdom-state
+subjects:
+- kind: ServiceAccount
+  name: engine
+  namespace: kingdom-state
+roleRef:
+  kind: Role
+  name: engine-set-flag
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: engine
+  namespace: kingdom-state
+spec:
+  serviceAccountName: engine
+  initContainers:
+  - name: copy-kubectl
+    image: rancher/k3s:v1.33.4-k3s1
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - cp -L /bin/kubectl /tools/kubectl && chmod 0755 /tools/kubectl
+    volumeMounts:
+    - mountPath: /tools
+      name: tools
+  containers:
+  - name: engine
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - |
+      while true; do
+        if /tools/kubectl get configmap book -n wizardshouse >/dev/null 2>&1; then
+          /tools/kubectl patch configmap kingdom-state -n kingdom-state --type merge -p '{"data":{"book":"true"}}' >/dev/null
+        fi
+        sleep 2
+      done
+    volumeMounts:
+    - mountPath: /tools
+      name: tools
+  volumes:
+  - name: tools
+    emptyDir: {}
