@@ -59,7 +59,7 @@ wait_pid=$!
 spin_i=0
 while kill -0 "$wait_pid" 2>/dev/null; do
   case $((spin_i % 4)) in 0) spin_c='|' ;; 1) spin_c='/' ;; 2) spin_c='-' ;; *) spin_c='\' ;; esac
-  printf '\rLoading the kingdom %s ' "$spin_c" >&2
+  printf '\rLoading the Kubernetes kingdom %s ' "$spin_c" >&2
   spin_i=$((spin_i + 1))
   sleep 0.2
 done
