@@ -28,6 +28,10 @@ enter() {
     return 1
   fi
   kubectl run player-pod --namespace="$1" --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity" >/dev/null || return 1
+  for _ in $(seq 60); do
+    [ "$(kubectl get pod player-pod --namespace="$1" -o jsonpath='{.status.phase}' 2>/dev/null)" = Running ] && break
+    sleep 1
+  done
   switch "$1" || return 1
   echo "You entered the $1, look around..."
 }
