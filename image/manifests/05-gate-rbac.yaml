@@ -8,7 +8,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: gate-unlock
-  namespace: default
+  namespace: kingdom-state
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
@@ -19,7 +19,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: gate-unlock
-  namespace: default
+  namespace: kingdom-state
 subjects:
 - kind: ServiceAccount
   name: gate

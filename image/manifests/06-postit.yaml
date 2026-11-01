@@ -13,5 +13,10 @@ spec:
       - /bin/sh
       - -c
       - |
-        echo "From here there is no way back. Speak this and you will be unmade, then made again, with the Book of k8s spells in your hands. Great power lives in its pages. Beware of it.  kubectl apply -f ~/...yaml" >> /dev/stderr;
+        echo "Beware, from here there is no way back. Speak this and you will be unmade, then made again, with the Book of k8s spells forever yours. Great power lives in its pages." >> /dev/stderr;
+        echo "" >> /dev/stderr;
+        echo "kubectl apply -f ~/...yaml" >> /dev/stderr;
+        echo "" >> /dev/stderr;
+        echo "then:" >> /dev/stderr;
+        echo "kubectl delete pod player-pod" >> /dev/stderr;
         sleep infinity

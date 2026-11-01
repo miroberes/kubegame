@@ -56,6 +56,25 @@ def ns_of(obj):
     return obj["metadata"].get("namespace") or "default"
 
 
+class _StrictLoader(yaml.SafeLoader):
+    """Rejects duplicate keys in a mapping, which PyYAML otherwise accepts silently."""
+
+
+def _construct_mapping_no_duplicates(loader, node, deep=False):
+    seen = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node)
+        if key in seen:
+            raise yaml.constructor.ConstructorError(
+                None, None, f"duplicate key {key!r}", key_node.start_mark)
+        seen.add(key)
+    return loader.construct_mapping(node, deep)
+
+
+_StrictLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+                              _construct_mapping_no_duplicates)
+
+
 def check_manifests():
     print("manifests")
     docs = []
@@ -63,7 +82,7 @@ def check_manifests():
         rel = os.path.relpath(path, ROOT)
         try:
             with open(path) as f:
-                docs += [(rel, d) for d in yaml.safe_load_all(f) if d]
+                docs += [(rel, d) for d in yaml.load_all(f, Loader=_StrictLoader) if d]
         except yaml.YAMLError as err:
             expect(False, f"{rel} does not parse: {err}")
 

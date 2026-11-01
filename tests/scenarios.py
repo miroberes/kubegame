@@ -55,7 +55,7 @@ SCENARIOS = [
             {"run": "dial 8081", "expect": ["dial 8081 Name"]},
             {"run": "dial 8080", "expect": ["If you wait long enough"]},
             {"run": "inspect bookshelf-pod", "expect": ["The Pipeline Grimoire"]},
-            {"run": "inspect postit-pod", "expect": ["Beware of it.  kubectl apply -f ~/...yaml"]},
+            {"run": "inspect postit-pod", "expect": ["Great power lives in its pages.", "kubectl apply -f ~/...yaml", "then:", "kubectl delete pod player-pod"]},
             {"run": "describe bookshelf-pod", "expect": ["The Pipeline Grimoire"]},
             {"run": "describe wizardshouse", "expect": ["A chimneysweep is on the roof, sweeping the chimney."]},
         ],
