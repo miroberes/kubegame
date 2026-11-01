@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chimneysweep
+  namespace: village
+  labels:
+    listed-in: village
+  annotations:
+    description: "The chimneysweep is up on the roof, sweeping the chimney"
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: chimneysweep
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: chimneysweep
+  namespace: village
+  labels:
+    run: chimneysweep
+    listed-in: village
+  annotations:
+    description: "The chimneysweep is up on the roof, sweeping the chimney"
+spec:
+  containers:
+  - name: chimneysweep
+    image: nginx
+    imagePullPolicy: Always
+    ports:
+      - containerPort: 80
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo 'Chimneysweep shouting from the roof: The message reads: Welcome to the village. Enjoy your stay. Call wizard on his phone if you want to visit him.' > /usr/share/nginx/html/index.html;
+        nginx -g 'daemon off;'

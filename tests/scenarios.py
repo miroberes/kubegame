@@ -11,19 +11,16 @@ SCENARIOS = [
     {
         "name": "Act 2 begins in the village",
         "steps": [
-            {"run": "openk8s"},
+            {"run": "openk8s", "expect": ["Correct magic key phrase! The gate opens and you see the village awaiting you to -enter-."]},
             {"run": "enter village", "expect": ["You entered the village, look around..."]},
             {"run": "describe village", "expect": ["small village"]},
             {
                 "run": "lookaround",
-                "expect": ["chimneysweep", "poster-on-the-chimney", "telephone-booth", "wizardshouse"],
+                "expect": ["chimneysweep", "telephone-booth", "wizardshouse"],
                 "absent": ["booth-telephone-pod", "telephone-operator"],
             },
             {"run": "call chimneysweep", "expect": ["Call wizard on his phone"]},
-        ],
-    },
-    {
-        "name": "The telephone booth",
+            {"run": "hey chimneysweep", "expect": ["Nice day, eh? Looking for the wizard?"]},
         "steps": [
             {"run": "enter telephone-booth", "expect": ["You entered the telephone-booth"]},
             {"run": "describe telephone-booth", "expect": ["recent calls: 8082, 8081, 7777"]},
@@ -32,7 +29,7 @@ SCENARIOS = [
                 "expect": ["booth-telephone", "telephone-book"],
                 "absent": ["booth-telephone-pod", "telephone-operator"],
             },
-            {"run": "inspect telephone-book", "expect": ["Wizard: 8081"]},
+            {"run": "inspect telephone-book", "expect": ["Wizard: dial 8081"]},
             {"run": "describe booth-telephone", "expect": ["A telephone hangs on the wall of the booth"]},
             {"run": "inspect booth-telephone", "expect": ["A telephone hangs on the wall of the booth"]},
             {"run": "dial chimneysweep", "expect": ["There is nothing called chimneysweep here."]},
@@ -50,7 +47,14 @@ SCENARIOS = [
         "steps": [
             {"run": "enter wizardshouse Bob", "expect": ["The wizard has not let you in yet."]},
             {"run": "enter wizardshouse Alice", "expect": ["You entered the wizardshouse"]},
-            {"run": "describe wizardshouse", "expect": ["A house with a chimney stands in the village"]},
+            {"run": "describe wizardshouse", "expect": ["A chimneysweep is on the roof, sweeping the chimney."]},
+        ],
+    },
+    {
+        "name": "Back to the village",
+        "steps": [
+            {"run": "enter village", "expect": ["You entered the village, look around..."]},
+            {"run": "call chimneysweep", "expect": ["Call wizard on his phone"]},
         ],
     },
 ]

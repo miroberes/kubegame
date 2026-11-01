@@ -25,6 +25,7 @@ _kingdom_normalize() {
   local -a words out
   read -r -a words <<<"$line"
   [ "${#words[@]}" -gt 0 ] || { printf '%s' "$line"; return; }
+  case "${words[0]:-}" in hey,|hi,) words[0]=${words[0]%,} ;; esac
   case "${words[0]}" in say|speak) words=("${words[@]:1}") ;; esac
   if [ "${words[0]:-}" = open ] && [ "${words[1]:-}" = k8s ]; then
     words=(openk8s "${words[@]:2}")
@@ -51,27 +52,7 @@ _kingdom_normalize() {
 
 if [[ $- == *i* ]]; then
   _kingdom_rewrite_line() {
-    case "$READLINE_LINE" in
-      "hey chimneysweep"|"hi chimneysweep")
-        _kingdom_talk=chimneysweep
-        READLINE_LINE='printf "%s\n" "Hey, how can I help you?"'
-        ;;
-      *)
-        if [ -n "$_kingdom_talk" ]; then
-          case "$READLINE_LINE" in
-            "read the poster")
-              _kingdom_talk=""
-              READLINE_LINE="call chimneysweep"
-              ;;
-            *)
-              READLINE_LINE='printf "%s\n" "Hey, how can I help you?"'
-              ;;
-          esac
-        else
-          READLINE_LINE=$(_kingdom_normalize "$READLINE_LINE")
-        fi
-        ;;
-    esac
+    READLINE_LINE=$(_kingdom_normalize "$READLINE_LINE")
     READLINE_POINT=${#READLINE_LINE}
   }
   bind -x '"\C-x\C-n": _kingdom_rewrite_line'

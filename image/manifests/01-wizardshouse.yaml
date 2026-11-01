@@ -5,5 +5,5 @@ metadata:
   labels:
     listed-in: village
   annotations:
-    description: "A house with a chimney stands in the village. A poster hangs on the chimney, too high to read."
-    outside-description: "A house with a chimney stands in the village. A poster hangs on the chimney, too high to read."
+    description: "A house with a chimney stands in the village. A chimneysweep is on the roof, sweeping the chimney."
+    outside-description: "A house with a chimney stands in the village. A chimneysweep is on the roof, sweeping the chimney."

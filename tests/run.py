@@ -124,8 +124,12 @@ SHELL_CASES = [
     ("dial booth-telephone:8081", "kubectl exec player-pod -- wget -q -O - booth-telephone:8081", 0),
     ("dial chimneysweep", "There is nothing called chimneysweep here.", 1),
     ("dial", "usage: dial booth-telephone:<port> [name]", 1),
+    ("enter nosuch-space", "There is nothing called nosuch-space here.", 1),
+    ("hey chimneysweep", "Nice day, eh? Looking for the wizard? You need to call him on his phone first.", 0),
+    ("hey nobody", "There is nothing called nobody here.", 1),
+    ('_kingdom_normalize "hey, chimneysweep"', "hey chimneysweep", 0),
     ('_kingdom_normalize "inspect the gate"', "inspect gate", 0),
-    ('_kingdom_normalize "read the poster"', "inspect poster", 0),
+    ('_kingdom_normalize "read the chimneysweep"', "inspect chimneysweep", 0),
     ('_kingdom_normalize "open k8s"', "openk8s", 0),
     ('_kingdom_normalize "k get pods in village"', "k get pods in village", 0),
 ]
@@ -207,14 +211,18 @@ def start_container():
 def check_e2e():
     from scenarios import SCENARIOS
     print("e2e")
+    started = time.time()
     start_container()
+    print(f"  container ready in {time.time() - started:.0f}s")
     game = None
     try:
         game = GameShell()
         for scenario in SCENARIOS:
             print(f"  {scenario['name']}")
             for step in scenario["steps"]:
+                step_started = time.time()
                 out = game.send(step["run"], timeout=step.get("timeout", 120))
+                print(f"    {step['run']}: {time.time() - step_started:.1f}s")
                 for text in step.get("expect", []):
                     ok = text in out
                     expect(ok, f"{scenario['name']}: '{step['run']}' output lacks {text!r}")

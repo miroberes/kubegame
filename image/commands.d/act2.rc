@@ -17,12 +17,25 @@ dial() {
 _kingdom_describe call "village" "call a service from your player-pod, e.g. call chimneysweep"
 _kingdom_describe dial "telephone-booth" "dial a number on the phone, e.g. dial XXXX"
 
+hey() {
+  case "$1" in
+    chimneysweep) echo "Nice day, eh? Looking for the wizard? You need to call him on his phone first." ;;
+    '') echo "usage: hey chimneysweep" >&2; return 1 ;;
+    *) echo "There is nothing called $1 here." >&2; return 1 ;;
+  esac
+}
+hi() { hey "$@"; }
+_kingdom_describe hey "village" "say hello to someone, e.g. hey chimneysweep"
+
 enter() {
   if [ -z "$1" ]; then
     echo "usage: enter <namespace>" >&2
     return 1
   fi
-  kubectl get namespace "$1" >/dev/null || return 1
+  if ! kubectl get namespaces -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null | grep -qx "$1"; then
+    echo "There is nothing called $1 here."
+    return 1
+  fi
   if [ "$1" = wizardshouse ]; then
     local name=${2:-} heard
     if [ -z "$name" ]; then read -r -p "Name: " name; fi
@@ -32,11 +45,20 @@ enter() {
       return 1
     fi
   fi
+  local cur
+  cur=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+  if [ -n "$cur" ]; then kubectl delete pod player-pod --namespace="$cur" --now --ignore-not-found >/dev/null 2>&1; fi
+  kubectl delete pod player-pod --namespace="$1" --now --ignore-not-found >/dev/null 2>&1
   kubectl run player-pod --namespace="$1" --image=curlimages/curl --image-pull-policy=IfNotPresent --command -- sh -c "sleep infinity" >/dev/null || return 1
+  local i=0 spin_c
   for _ in $(seq 60); do
     [ "$(kubectl get pod player-pod --namespace="$1" -o jsonpath='{.status.phase}' 2>/dev/null)" = Running ] && break
+    case $((i % 4)) in 0) spin_c='|' ;; 1) spin_c='/' ;; 2) spin_c='-' ;; *) spin_c='\' ;; esac
+    printf '\r%s ' "$spin_c" >&2
+    i=$((i + 1))
     sleep 1
   done
+  printf '\r  \r' >&2
   switch "$1" || return 1
   echo "You entered the $1, look around..."
 }

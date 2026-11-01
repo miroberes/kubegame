@@ -43,7 +43,7 @@ spec:
       #!/bin/sh
       SECRET_PHRASE=$(cat /doormat/magic-key-phrase)
       if [ "$1" = "$SECRET_PHRASE" ]; then
-        echo "Correct magic key phrase! The gate opens and you see the village awaiting you to enter."
+        echo "Correct magic key phrase! The gate opens and you see the village awaiting you to -enter-."
       else
         echo "Incorrect magic key phrase. Try again."
         exit 1

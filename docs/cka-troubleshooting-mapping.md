@@ -16,7 +16,7 @@ Troubleshooting is the heaviest CKA domain, at about 30% of the exam (one source
 
 | CKA troubleshooting area | Typical exam tasks | Fits the game? |
 |---|---|---|
-| Container output streams | `logs`, `logs --previous`, `-c`, events | **Yes.** Already in Act I and the ladder (the dying poster-pod, ImagePullBackOff) |
+| Container output streams | `logs`, `logs --previous`, `-c`, events | **Yes.** Already in Act I and the ladder (the dying chimneysweep pod, ImagePullBackOff) |
 | Application failure | CrashLoopBackOff, bad image, missing ConfigMap or Secret, Pending pods | **Yes.** Most of the ladder |
 | Services and networking | Selectors and endpoints, ports, DNS, NetworkPolicy, CNI | **Mostly.** See the DNS note in section 3 |
 | Resource usage | `kubectl top`, quotas, limits | **Probably.** Needs metrics-server; check whether k3s bundles and enables it by default |
