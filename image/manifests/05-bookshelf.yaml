@@ -6,7 +6,7 @@ metadata:
   labels:
     listed-in: wizardshouse
   annotations:
-    description: "A tall shelf bows under the weight of the wizard’s library, The Pipeline Grimoire. Containers for the Curious. A Hundred Rollouts and One Rollback. Infrastructure as Incantation. Why Is It Pending? A Wizard’s Troubleshooting Almanac."
+    description: "A tall shelf bows under the weight of the wizard’s library, The Pipeline Grimoire. Containers for the Curious. A Hundred Rollouts and One Rollback. Infrastructure as Incantation. Why Is It Pending? A Wizard’s Troubleshooting Almanac. A barely readable note on an old post-it hangs over the gap where one book is missing."
 spec:
   containers:
   - name: cluelogger
@@ -15,5 +15,5 @@ spec:
       - /bin/sh
       - -c
       - |
-        echo "A tall shelf bows under the weight of the wizard’s library, The Pipeline Grimoire. Containers for the Curious. A Hundred Rollouts and One Rollback. Infrastructure as Incantation. Why Is It Pending? A Wizard’s Troubleshooting Almanac." >> /dev/stderr;
+        echo "A tall shelf bows under the weight of the wizard’s library, The Pipeline Grimoire. Containers for the Curious. A Hundred Rollouts and One Rollback. Infrastructure as Incantation. Why Is It Pending? A Wizard’s Troubleshooting Almanac. A barely readable note on an old post-it hangs over the gap where one book is missing." >> /dev/stderr;
         sleep infinity

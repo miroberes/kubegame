@@ -24,6 +24,7 @@ VOLUME ["/var/lib/cni", "/var/lib/kubelet", "/var/lib/rancher/k3s", "/var/log"]
 COPY image/entrypoint.sh /entrypoint.sh
 RUN chmod 0755 /entrypoint.sh
 COPY image/welcome.txt /game/welcome.txt
+COPY image/k8s-spellkeeper.yaml /game/k8s-spellkeeper.yaml
 COPY image/VERSION /game/VERSION
 COPY image/commands.sh /etc/kingdom/commands.sh
 COPY image/commands.d/ /etc/kingdom/commands.d/

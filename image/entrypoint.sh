@@ -97,6 +97,8 @@ chmod 0600 "$PLAYER_KUBECONFIG"
 
 printf 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nexport KUBECONFIG=%s\n. /etc/kingdom/commands.sh\n' "$PLAYER_KUBECONFIG" >"$PLAYER_HOME/.profile"
 chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/.profile"
+cp /game/k8s-spellkeeper.yaml "$PLAYER_HOME/k8s-spellkeeper.yaml"
+chown "$PLAYER_USER:$PLAYER_USER" "$PLAYER_HOME/k8s-spellkeeper.yaml"
 
 # Step 4: welcome text.
 printf '\n'

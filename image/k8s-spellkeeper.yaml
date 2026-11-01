@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-spellkeeper-pod
+spec:
+  terminationGracePeriodSeconds: 1
+  containers:
+  - name: k8s-spellkeeper-pod
+    image: curlimages/curl
+    imagePullPolicy: IfNotPresent
+    command:
+    - sh
+    - -c
+    - sleep infinity
+    volumeMounts:
+    - name: book
+      mountPath: /home/player/book-of-k8s-spells
+      readOnly: true
+  volumes:
+  - name: book
+    configMap:
+      name: book
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: book
+data:
+  book-of-k8s-spells.txt: |
+    some foreword only for now
