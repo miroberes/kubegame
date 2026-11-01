@@ -33,6 +33,7 @@ SCENARIOS = [
                 "absent": ["booth-telephone-pod", "telephone-operator"],
             },
             {"run": "inspect telephone-book", "expect": ["Wizard: 8081"]},
+            {"run": "describe booth-telephone", "expect": ["A telephone hangs on the wall of the booth"]},
             {"run": "dial chimneysweep", "expect": ["There is nothing called chimneysweep here."]},
         ],
     },

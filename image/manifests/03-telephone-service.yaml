@@ -5,6 +5,8 @@ metadata:
   namespace: telephone-booth
   labels:
     listed-in: telephone-booth
+  annotations:
+    description: "A telephone hangs on the wall of the booth. To call someone, use -dial number- from the telephone book."
 spec:
   clusterIP: None
   ports:
