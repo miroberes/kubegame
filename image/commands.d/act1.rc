@@ -30,6 +30,8 @@ inspect() {
   local out
   if out=$(kubectl logs -c cluelogger "$1" 2>/dev/null); then
     printf '%s\n' "$out"
+  elif kubectl get service "$1" >/dev/null 2>&1; then
+    describe "$1"
   elif kubectl get namespace "$1" >/dev/null 2>&1; then
     local cur
     cur=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
