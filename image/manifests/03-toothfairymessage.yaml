@@ -5,4 +5,4 @@ data:
 kind: ConfigMap
 metadata:
   name: toothfairymessage
-  namespace: telephone-booth
+  namespace: village-management-center

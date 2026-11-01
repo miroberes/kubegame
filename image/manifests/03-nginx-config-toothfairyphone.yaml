@@ -13,4 +13,4 @@ data:
 kind: ConfigMap
 metadata:
   name: nginx-config-toothfairyphone
-  namespace: telephone-booth
+  namespace: village-management-center

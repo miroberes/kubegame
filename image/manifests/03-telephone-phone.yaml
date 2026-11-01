@@ -17,11 +17,11 @@ data:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: telephone-phone
+  name: booth-telephone
   namespace: telephone-booth
   labels:
     app: telephone-phone
-  name: telephone-phone
+spec:
   containers:
   - name: phone
     image: nginx

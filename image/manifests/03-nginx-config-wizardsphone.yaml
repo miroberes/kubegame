@@ -13,4 +13,4 @@ data:
 kind: ConfigMap
 metadata:
   name: nginx-config-wizardsphone
-  namespace: telephone-booth
+  namespace: village-management-center
