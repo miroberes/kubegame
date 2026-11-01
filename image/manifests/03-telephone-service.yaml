@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: booth-telephone-service
+  name: booth-telephone
   namespace: telephone-booth
   labels:
     listed-in: telephone-booth

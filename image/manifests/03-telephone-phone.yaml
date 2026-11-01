@@ -17,7 +17,7 @@ data:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: booth-telephone
+  name: booth-telephone-pod
   namespace: telephone-booth
   labels:
     app: telephone-phone

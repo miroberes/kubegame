@@ -12,7 +12,7 @@ rules:
   verbs: ["list"]
 - apiGroups: [""]
   resources: ["services", "endpoints"]
-  resourceNames: ["booth-telephone-service"]
+  resourceNames: ["booth-telephone"]
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["pods"]
