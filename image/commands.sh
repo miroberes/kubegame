@@ -16,6 +16,7 @@ _kingdom_load_commands() {
 
 PS0='\n'
 PROMPT_COMMAND='printf "\n"; _kingdom_load_commands'
+alias k=kubectl
 
 # Rewrites a typed line before it runs: maps synonyms to command names and drops filler words.
 # Lines that don't start with a known command are returned unchanged, so raw kubectl still works.
@@ -30,6 +31,7 @@ _kingdom_normalize() {
   fi
 
   case "${words[0]}" in
+    k) printf '%s' "$line"; return ;;
     look|l) verb=lookaround ;;
     examine|x|read|check) verb=inspect ;;
     go|walk) verb=switch ;;
