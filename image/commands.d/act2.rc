@@ -1,6 +1,9 @@
 alias call='kubectl exec player-pod -- wget -q -O -'
 dial() {
   case "$1" in
+    [0-9]*) set -- "booth-telephone:$1" "${@:2}" ;;
+  esac
+  case "$1" in
     booth-telephone|booth-telephone:*) ;;
     '') echo "usage: dial booth-telephone:<port> [name]" >&2; return 1 ;;
     *) echo "There is nothing called $1 here." >&2; return 1 ;;

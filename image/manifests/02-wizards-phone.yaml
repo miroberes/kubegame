@@ -26,7 +26,7 @@ data:
     elif [ -s /data/name ]; then
       echo "I remember: $(cat /data/name)"
     else
-      echo "Hello, this is the Wizard. Leave a message with your name."
+      echo "Hello, this is the Wizard. If you want to visit me, leave your name like this: dial 8081 Name"
     fi
 ---
 apiVersion: v1
@@ -50,7 +50,7 @@ spec:
       - -c
       - |
         mkdir -p /www/cgi-bin
-        echo 'Hello, this is the Wizard. Leave a message with your name.' > /www/index.html
+        echo 'Hello, this is the Wizard. If you want to visit me, leave your name like this: dial 8081 Name' > /www/index.html
         cp /cgi/message /www/cgi-bin/message
         chmod 755 /www/cgi-bin/message
         exec httpd -f -p 8081 -h /www
