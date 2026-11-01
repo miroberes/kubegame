@@ -22,7 +22,7 @@ data:
     echo
     if [ "$REQUEST_METHOD" = POST ]; then
       head -c "${CONTENT_LENGTH:-0}" > /data/name
-      echo "Thank you, I will remember your name. Use it to enter my house."
+      echo "Thank you, $(cat /data/name). I will remember your name. Use it to enter my house."
     elif [ -s /data/name ]; then
       echo "I remember: $(cat /data/name)"
     else

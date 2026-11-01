@@ -41,7 +41,7 @@ SCENARIOS = [
         "name": "The wizard's phone",
         "steps": [
             {"run": "dial 8081", "expect": ["dial 8081 Name"]},
-            {"run": "dial 8081 Alice", "expect": ["Thank you, I will remember your name."]},
+            {"run": "dial 8081 Alice", "expect": ["Thank you, Alice. I will remember your name."]},
         ],
     },
     {

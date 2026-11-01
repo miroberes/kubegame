@@ -5,5 +5,5 @@ metadata:
   labels:
     listed-in: village
   annotations:
-    description: "A classic telephone booth, sturdy but worn. The receiver hums softly. The display flickers, showing recent calls: 8082, 8081, 7777..."
+    description: "A classic telephone booth, sturdy but worn. The display flickers, showing recent calls: 8082, 8081, 7777..."
     outside-description: "Nearby stands an old telephone booth."
