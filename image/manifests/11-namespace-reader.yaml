@@ -5,7 +5,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["namespaces"]
-  resourceNames: ["default", "village", "wizardshouse"]
+  resourceNames: ["default", "village", "wizardshouse", "telephone-booth"]
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["namespaces"]

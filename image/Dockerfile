@@ -31,7 +31,7 @@ COPY image/commands.d/ /etc/kingdom/commands.d/
 # until the telephone book replaces the duplicate telephone Service.
 COPY image/manifests/ /game/manifests/
 COPY chimneysweep.yaml nginx-config-toothfairyphonecm.yaml nginx-config-wizardsphonecm.yaml \
-     poster-on-the-chimney.yaml telephone-boothpod.yaml telephone-operatorpod.yaml \
+     poster-on-the-chimney.yaml telephone-operatorpod.yaml \
      telephonesvc.yaml toothfairymessagecm.yaml wizardsmessagecm.yaml /game/manifests/
 COPY default/gatepod.yaml default/instructionspod.yaml default/startgamesvc.yaml /game/manifests/default/
 

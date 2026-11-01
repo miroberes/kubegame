@@ -1,5 +1,16 @@
 CKAD Exam Tips: https://miroberes.github.io/
 
+## Run the game
+
+Build the image from the repo root, then start the game:
+
+```
+docker build -f image/Dockerfile -t kingdom/game .
+docker run -it --rm --privileged --cgroupns=host kingdom/game
+```
+
+`--privileged` and `--cgroupns=host` are needed for the k3s cluster to start inside the container.
+
 --- provide initial scene, like in Goblins, setting the objective
 
 --- provide inventory - text files named after tools needed
